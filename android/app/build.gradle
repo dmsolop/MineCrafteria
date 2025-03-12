@@ -2,6 +2,7 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
+    id 'com.google.gms.google-services'
 }
 
 def localProperties = new Properties()
@@ -69,6 +70,9 @@ android {
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.release
         }
@@ -95,4 +99,12 @@ dependencies {
     implementation("com.cleveradssolutions:google:23.5.0.0")      // Google Ads | Admob
     implementation("com.cleveradssolutions:fyber:8.3.3.0")        // DT Exchange
     implementation("com.cleveradssolutions:yandex:27.6.0.1")      // Yandex Ads
+
+    implementation 'com.google.firebase:firebase-bom:32.7.3'      // Актуальна BOM-версія
+    implementation 'com.google.firebase:firebase-analytics'       // Firebase Analytics (можна прибрати, якщо не потрібне)
+    implementation 'com.google.firebase:firebase-config'          // Firebase Remote Config
+
+    // implementation 'com.google.android.play:core:1.10.3'           // Play Core
 }
+
+apply plugin: 'com.google.gms.google-services'

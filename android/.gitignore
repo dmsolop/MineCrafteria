@@ -5,3 +5,5 @@ gradle-wrapper.jar
 /gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
+/app/melon-keystore.jks
+/app/google-services.json
