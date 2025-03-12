@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/vladislavgorik/development/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/vladislavgorik/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Volumes/SSD/dmytro meedlight/morph_mods/android/app/.cxx/Debug/5z4sl5o2/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/vladislavgorik/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Volumes/SSD/dmytro meedlight/morph_mods/android/app/.cxx/Debug/5z4sl5o2/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

@@ -1,0 +1,84 @@
+pluginManagement {
+    def flutterSdkPath = {
+        def properties = new Properties()
+        file("local.properties").withInputStream { properties.load(it) }
+        def flutterSdkPath = properties.getProperty("flutter.sdk")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
+    }
+    settings.ext.flutterSdkPath = flutterSdkPath()
+
+    includeBuild("${settings.ext.flutterSdkPath}/packages/flutter_tools/gradle")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+
+        maven {  
+            name = "IronSourceAdsRepo"  
+            url = "https://android-sdk.is.com/"  
+            content { it.includeGroup("com.ironsource.sdk") }  
+        }  
+        maven {  
+            name = "MintegralAdsRepo"  
+            url = "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea"  
+            content { it.includeGroup("com.mbridge.msdk.oversea") }  
+        }  
+        maven {  
+            name = "PangleAdsRepo"  
+            url = "https://artifact.bytedance.com/repository/pangle"  
+            content { it.includeGroup("com.pangle.global") }  
+        }  
+        maven {  
+            name = "SuperAwesomeAdsRepo"  
+            url = "https://aa-sdk.s3-eu-west-1.amazonaws.com/android_repo"  
+            content { it.includeGroup("tv.superawesome.sdk.publisher") }  
+        }  
+        maven {  
+            name = "ChartboostAdsRepo"  
+            url = "https://cboost.jfrog.io/artifactory/chartboost-ads/"  
+            content { it.includeGroup("com.chartboost") }  
+        }
+    }
+}
+
+plugins {
+    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "com.android.application" version "8.2.1" apply false
+    id "org.jetbrains.kotlin.android" version "1.9.24" apply false
+}
+
+dependencyResolutionManagement {
+  repositories {
+    google()  
+    mavenCentral()  
+    maven {  
+        name = "IronSourceAdsRepo"  
+        url = "https://android-sdk.is.com/"  
+        content { it.includeGroup("com.ironsource.sdk") }  
+    }  
+    maven {  
+        name = "MintegralAdsRepo"  
+        url = "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea"  
+        content { it.includeGroup("com.mbridge.msdk.oversea") }  
+    }  
+    maven {  
+        name = "PangleAdsRepo"  
+        url = "https://artifact.bytedance.com/repository/pangle"  
+        content { it.includeGroup("com.pangle.global") }  
+    }  
+    maven {  
+        name = "SuperAwesomeAdsRepo"  
+        url = "https://aa-sdk.s3-eu-west-1.amazonaws.com/android_repo"  
+        content { it.includeGroup("tv.superawesome.sdk.publisher") }  
+    }  
+    maven {  
+        name = "ChartboostAdsRepo"  
+        url = "https://cboost.jfrog.io/artifactory/chartboost-ads/"  
+        content { it.includeGroup("com.chartboost") }  
+    }
+  }
+}
+
+include ":app"

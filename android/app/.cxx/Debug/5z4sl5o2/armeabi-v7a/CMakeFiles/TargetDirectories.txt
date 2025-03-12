@@ -1,0 +1,2 @@
+/Volumes/SSD/dmytro meedlight/morph_mods/android/app/.cxx/Debug/5z4sl5o2/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Volumes/SSD/dmytro meedlight/morph_mods/android/app/.cxx/Debug/5z4sl5o2/armeabi-v7a/CMakeFiles/rebuild_cache.dir
