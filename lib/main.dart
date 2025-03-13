@@ -1,4 +1,5 @@
 import 'dart:convert';
+// import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -23,12 +24,17 @@ import 'frontend/RestartWidget.dart';
 import 'package:morph_mods/backend/ModsManager.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show PlatformDispatcher, kIsWeb;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:clever_ads_solutions/clever_ads_solutions.dart'; // CAS
 
 final FlutterLocalization localization = FlutterLocalization.instance;
 ModService? modService;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(); // Firebase initialization
 
   if (Platform.isAndroid || Platform.isIOS) {
     bool isTabletDevice = await isTablet();
@@ -88,6 +94,56 @@ void main() async {
   runApp(const RestartWidget(ModListApp()));
 }
 
+// Future<void> fetchRemoteConfig() async {
+//   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+
+//   await remoteConfig.setConfigSettings(RemoteConfigSettings(
+//     fetchTimeout: const Duration(seconds: 10),
+//     minimumFetchInterval: const Duration(hours: 1),
+//   ));
+
+//   try {
+//     await remoteConfig.fetchAndActivate(); // Downloading and activating updates
+
+//     bool enableAds = remoteConfig.getBool("enable_ads");
+
+//     // Call CAS initialization only after receiving configuration
+//     if (enableAds) {
+//       print("Firebase Remote Config received. enable_ads: $enableAds");
+//       AdManager.initialize();
+//     }
+//   } catch (e) {
+//     print("Firebase Remote Config download error: $e");
+//   }
+// }
+
+Future<void> fetchRemoteConfig() async {
+  final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
+
+  await remoteConfig.setConfigSettings(RemoteConfigSettings(
+    fetchTimeout: const Duration(seconds: 10),
+    minimumFetchInterval:
+        Duration.zero, // Примусове оновлення при кожному запуску
+  ));
+
+  try {
+    await remoteConfig.fetchAndActivate();
+
+    // Виведемо весь конфіг для перевірки
+    Map<String, dynamic> allParams = remoteConfig.getAll();
+    print("🔥 Remote Config Parameters: $allParams");
+
+    bool enableAds = remoteConfig.getBool("enable_ads");
+    print("✅ Firebase Remote Config received. enable_ads: $enableAds");
+
+    if (enableAds) {
+      AdManager.initialize();
+    }
+  } catch (e) {
+    print("❌ Помилка завантаження Remote Config: $e");
+  }
+}
+
 Future<bool> isTablet() async {
   final deviceInfo = DeviceInfoPlugin();
   bool isTablet = false;
@@ -125,8 +181,9 @@ Future<void> init() async {
   }
 
   // ColorsInfo.IsDark = isDarkSaved;
-
-  AdManager.initialize();
+  await Future.delayed(Duration(milliseconds: 500));
+  await fetchRemoteConfig(); // Getting settings before launching CAS
+  // AdManager.initialize();
 
   modService = ModService();
   modService!.mods = await modService!.fetchModItems();
