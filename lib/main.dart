@@ -28,6 +28,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:clever_ads_solutions/clever_ads_solutions.dart'; // CAS
 
+//test gap
 final FlutterLocalization localization = FlutterLocalization.instance;
 ModService? modService;
 
