@@ -26,7 +26,9 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show PlatformDispatcher, kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:clever_ads_solutions/clever_ads_solutions.dart'; // CAS
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'backend/NativeAdManager.dart';
+import 'frontend/NativeAdWidget.dart';
 
 //test gap
 final FlutterLocalization localization = FlutterLocalization.instance;
@@ -36,10 +38,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(); // Firebase initialization
+  MobileAds.instance.initialize(); // AdMob initialization
+  NativeAdManager.preLoadAd(); //Loading native ads
 
   if (Platform.isAndroid || Platform.isIOS) {
     bool isTabletDevice = await isTablet();
-
     if (isTabletDevice) {
       SystemChrome.setPreferredOrientations([
         // DeviceOrientation.portraitUp,
@@ -673,107 +676,223 @@ class ModListScreenState extends State<ModListScreen>
                             mainAxisExtent: 215,
                             childAspectRatio: 225 / 205,
                           ),
-                          // itemCount: SubscriptionManager.isPremiumUser ? modItems.length : (modItems.length + (modItems.length ~/ 5)),
+                          itemCount: modItems.length +
+                              (modItems.length ~/ 5), // 🔹 Враховуємо рекламу
                           itemBuilder: (context, index) {
-                            if (modItems.length > index) {
-                              return SizedBox(
-                                // width: 394,
-                                // height: 238,
-                                child: InkWell(
-                                    onTap: () async {
-                                      if (true) {
-                                        if (AdManager.nextTimeInterstitial ==
-                                            null) {
-                                          if (await AdManager.manager!
-                                              .isInterstitialReady()) {
-                                            AdManager.interstitialListener =
-                                                InterstitialListener();
-                                            await AdManager.manager!
-                                                .showInterstitial(AdManager
-                                                    .interstitialListener!);
-
-                                            await waitWhile(() => AdManager
-                                                .interstitialListener!.adEnded);
-
-                                            AdManager.nextTimeInterstitial =
-                                                DateTime.now().add(
-                                                    const Duration(
-                                                        seconds: 60));
-                                          }
-                                        } else {
-                                          if (AdManager.nextTimeInterstitial!
-                                              .isBefore(DateTime.now())) {
-                                            if (await AdManager.manager!
-                                                .isInterstitialReady()) {
-                                              AdManager.interstitialListener =
-                                                  InterstitialListener();
-                                              await AdManager.manager!
-                                                  .showInterstitial(AdManager
-                                                      .interstitialListener!);
-
-                                              await waitWhile(() => AdManager
-                                                  .interstitialListener!
-                                                  .adEnded);
-
-                                              AdManager.nextTimeInterstitial =
-                                                  DateTime.now().add(
-                                                      const Duration(
-                                                          seconds: 60));
-                                            }
-                                          }
-                                        }
-                                      }
-
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              screenWidth > 700
-                                                  ? ModDetailScreenPadWidget(
-                                                      modItem: modItems[index],
-                                                      modListScreen: this,
-                                                      favoritesListScreen: null,
-                                                      modListIndex:
-                                                          _activeCategoryIndex,
-                                                    )
-                                                  : ModDetailScreenWidget(
-                                                      modItem: modItems[index],
-                                                      modListScreen: this,
-                                                      favoritesListScreen: null,
-                                                      modListIndex:
-                                                          _activeCategoryIndex,
-                                                    ),
-                                        ),
-                                      );
-                                    },
-                                    child: VisibilityDetector(
-                                      key: Key(modItems[index].imageUrl +
-                                          modItems[index]
-                                              .isFirestoreChecked
-                                              .toString()),
-                                      onVisibilityChanged: (visibility) async {
-                                        if (visibility.visibleFraction > 0 &&
-                                            !modItems[index]
-                                                .isFirestoreChecked) {
-                                        } else if (visibility.visibleFraction >
-                                            0) {
-                                          bool cached = await CacheManager
-                                              .isCacheAvailable(
-                                                  modItems[index].downloadURL);
-
-                                          setState(() {
-                                            modItems[index].cached = cached;
-                                          });
-                                        }
-                                      },
-                                      child:
-                                          ModItem(modItemData: modItems[index]),
-                                    )),
-                              );
+                            // 🔹 Показ реклами після кожних 5 модів (позиція 6, 12, 18…)
+                            if ((index + 1) % 6 == 0) {
+                              return NativeAdManager.getAdWidget(index,
+                                  refresh: () {
+                                setState(
+                                    () {}); // 🔁 Оновити після завантаження реклами
+                              });
                             }
-                            return null;
+
+                            // 🔹 Реальний індекс модів (без врахування реклами)
+                            int actualIndex = index - (index ~/ 6);
+
+                            // 🔹 Захист від виходу за межі масиву
+                            if (actualIndex >= modItems.length) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return SizedBox(
+                              child: InkWell(
+                                onTap: () async {
+                                  // 🔸 Логіка Interstitial реклами
+                                  if (AdManager.nextTimeInterstitial == null) {
+                                    if (await AdManager.manager!
+                                        .isInterstitialReady()) {
+                                      AdManager.interstitialListener =
+                                          InterstitialListener();
+                                      await AdManager.manager!.showInterstitial(
+                                          AdManager.interstitialListener!);
+                                      await waitWhile(() => AdManager
+                                          .interstitialListener!.adEnded);
+                                      AdManager.nextTimeInterstitial =
+                                          DateTime.now()
+                                              .add(const Duration(seconds: 60));
+                                    }
+                                  } else if (AdManager.nextTimeInterstitial!
+                                      .isBefore(DateTime.now())) {
+                                    if (await AdManager.manager!
+                                        .isInterstitialReady()) {
+                                      AdManager.interstitialListener =
+                                          InterstitialListener();
+                                      await AdManager.manager!.showInterstitial(
+                                          AdManager.interstitialListener!);
+                                      await waitWhile(() => AdManager
+                                          .interstitialListener!.adEnded);
+                                      AdManager.nextTimeInterstitial =
+                                          DateTime.now()
+                                              .add(const Duration(seconds: 60));
+                                    }
+                                  }
+
+                                  // 🔸 Переходи між екранами
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => screenWidth > 700
+                                          ? ModDetailScreenPadWidget(
+                                              modItem: modItems[actualIndex],
+                                              modListScreen: this,
+                                              favoritesListScreen: null,
+                                              modListIndex:
+                                                  _activeCategoryIndex,
+                                            )
+                                          : ModDetailScreenWidget(
+                                              modItem: modItems[actualIndex],
+                                              modListScreen: this,
+                                              favoritesListScreen: null,
+                                              modListIndex:
+                                                  _activeCategoryIndex,
+                                            ),
+                                    ),
+                                  );
+                                },
+                                child: VisibilityDetector(
+                                  key: Key(modItems[actualIndex].imageUrl +
+                                      modItems[actualIndex]
+                                          .isFirestoreChecked
+                                          .toString()),
+                                  onVisibilityChanged: (visibility) async {
+                                    if (visibility.visibleFraction > 0 &&
+                                        !modItems[actualIndex]
+                                            .isFirestoreChecked) {
+                                      // 🔸 Тут може бути твоя логіка для Firestore
+                                    } else if (visibility.visibleFraction > 0) {
+                                      bool cached =
+                                          await CacheManager.isCacheAvailable(
+                                              modItems[actualIndex]
+                                                  .downloadURL);
+                                      setState(() {
+                                        modItems[actualIndex].cached = cached;
+                                      });
+                                    }
+                                  },
+                                  child: ModItem(
+                                      modItemData: modItems[actualIndex]),
+                                ),
+                              ),
+                            );
                           },
                         );
+
+                        // return GridView.builder(
+                        //   padding: const EdgeInsets.symmetric(
+                        //       vertical: 16, horizontal: 8),
+                        //   gridDelegate:
+                        //       SliverGridDelegateWithFixedCrossAxisCount(
+                        //     crossAxisCount: crossAxisCount,
+                        //     crossAxisSpacing: 8,
+                        //     mainAxisSpacing: 8,
+                        //     mainAxisExtent: 215,
+                        //     childAspectRatio: 225 / 205,
+                        //   ),
+                        //   //  itemCount: SubscriptionManager.isPremiumUser ? modItems.length : (modItems.length + (modItems.length ~/ 5)),
+                        //   itemBuilder: (context, index) {
+                        //     // 🔹 Загальна кількість елементів (моди + реклама)
+                        //     int totalItems =
+                        //         modItems.length + (modItems.length ~/ 5);
+
+                        //     // 🔹 Якщо індекс перевищує загальну кількість, припиняємо рендер (щоб уникнути пустих місць)
+                        //     if (index >= totalItems) {
+                        //       return null;
+                        //     }
+
+                        //     // 🔹 Вставка реклами кожні 5 елементів
+                        //     if ((index + 1) % 6 == 0) {
+                        //       return NativeAdManager.getNativeAdWidget();
+                        //     }
+
+                        //     // 🔹 Розрахунок правильного `actualIndex` для модів
+                        //     int actualIndex = index - (index ~/ 6);
+
+                        //     // 🔹 Переконаємось, що ми не виходимо за межі `modItems`
+                        //     if (actualIndex >= modItems.length) {
+                        //       return const SizedBox.shrink();
+                        //     }
+
+                        //     return SizedBox(
+                        //       child: InkWell(
+                        //         onTap: () async {
+                        //           if (AdManager.nextTimeInterstitial == null) {
+                        //             if (await AdManager.manager!
+                        //                 .isInterstitialReady()) {
+                        //               AdManager.interstitialListener =
+                        //                   InterstitialListener();
+                        //               await AdManager.manager!.showInterstitial(
+                        //                   AdManager.interstitialListener!);
+                        //               await waitWhile(() => AdManager
+                        //                   .interstitialListener!.adEnded);
+                        //               AdManager.nextTimeInterstitial =
+                        //                   DateTime.now()
+                        //                       .add(const Duration(seconds: 60));
+                        //             }
+                        //           } else if (AdManager.nextTimeInterstitial!
+                        //               .isBefore(DateTime.now())) {
+                        //             if (await AdManager.manager!
+                        //                 .isInterstitialReady()) {
+                        //               AdManager.interstitialListener =
+                        //                   InterstitialListener();
+                        //               await AdManager.manager!.showInterstitial(
+                        //                   AdManager.interstitialListener!);
+                        //               await waitWhile(() => AdManager
+                        //                   .interstitialListener!.adEnded);
+                        //               AdManager.nextTimeInterstitial =
+                        //                   DateTime.now()
+                        //                       .add(const Duration(seconds: 60));
+                        //             }
+                        //           }
+
+                        //           Navigator.push(
+                        //             context,
+                        //             MaterialPageRoute(
+                        //               builder: (context) => screenWidth > 700
+                        //                   ? ModDetailScreenPadWidget(
+                        //                       modItem: modItems[actualIndex],
+                        //                       modListScreen: this,
+                        //                       favoritesListScreen: null,
+                        //                       modListIndex:
+                        //                           _activeCategoryIndex,
+                        //                     )
+                        //                   : ModDetailScreenWidget(
+                        //                       modItem: modItems[actualIndex],
+                        //                       modListScreen: this,
+                        //                       favoritesListScreen: null,
+                        //                       modListIndex:
+                        //                           _activeCategoryIndex,
+                        //                     ),
+                        //             ),
+                        //           );
+                        //         },
+                        //         child: VisibilityDetector(
+                        //           key: Key(modItems[actualIndex].imageUrl +
+                        //               modItems[actualIndex]
+                        //                   .isFirestoreChecked
+                        //                   .toString()),
+                        //           onVisibilityChanged: (visibility) async {
+                        //             if (visibility.visibleFraction > 0 &&
+                        //                 !modItems[actualIndex]
+                        //                     .isFirestoreChecked) {
+                        //             } else if (visibility.visibleFraction > 0) {
+                        //               bool cached =
+                        //                   await CacheManager.isCacheAvailable(
+                        //                       modItems[actualIndex]
+                        //                           .downloadURL);
+                        //               setState(() {
+                        //                 modItems[actualIndex].cached = cached;
+                        //               });
+                        //             }
+                        //           },
+                        //           child: ModItem(
+                        //               modItemData: modItems[actualIndex]),
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        // );
                       },
                     ),
                   );
