@@ -39,11 +39,11 @@ class NativeAdManager {
           ad.dispose();
           _loadingIndices.remove(index);
         },
-        onAdClosed: (ad) {
-          ad.dispose();
-          _adCache.remove(index);
-          loadAdForIndex(index); // 🔁 Перезавантажити
-        },
+        // onAdClosed: (ad) {
+        //   ad.dispose();
+        //   _adCache.remove(index);
+        //   loadAdForIndex(index); // 🔁 Перезавантажити
+        // },
       ),
     );
 
@@ -66,6 +66,13 @@ class NativeAdManager {
       loadAdForIndex(index); // 🔹 Завантажити, якщо ще нема
       return const SizedBox(height: 290); // Placeholder
     }
+  }
+
+  static void disposeAllAds() {
+    for (final ad in _adCache.values) {
+      ad.dispose();
+    }
+    _adCache.clear();
   }
 }
 

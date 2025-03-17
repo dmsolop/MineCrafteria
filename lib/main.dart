@@ -301,6 +301,7 @@ class ModListScreenState extends State<ModListScreen>
     _searchController.dispose();
     _scrollController.dispose(); // Dispose the scroll controller
     _controller.dispose();
+    NativeAdManager.disposeAllAds();
     super.dispose();
   }
 
