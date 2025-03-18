@@ -58,7 +58,7 @@ class NativeAdManager {
 
       // 🔸 Повертаємо віджет, реклама кешована
       return Container(
-        constraints: const BoxConstraints(minHeight: 290),
+        height: 290,
         padding: const EdgeInsets.all(4),
         child: adWidget,
       );
