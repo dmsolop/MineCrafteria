@@ -9,17 +9,23 @@ class NativeAdManager {
   static final Map<int, NativeAd> _adCache = {};
   static final Set<int> _loadingIndices = {};
 
+  static VoidCallback? onAdLoadedCallback;
+
+  static void setOnAdLoadedCallback(VoidCallback callback) {
+    onAdLoadedCallback = callback;
+  }
+
   /// 🔹 Попереднє завантаження для перших 3 позицій (5, 11, 17)
   static void preLoadAd() {
-    for (int i = 5; i < 20; i += 6) {
+    for (int i = 6; i < 24; i += 6) {
       loadAdForIndex(i);
     }
   }
 
   /// 🔹 Завантажити рекламу для конкретного індекса
-  static void loadAdForIndex(int index) {
+  static void loadAdForIndex(int index, {VoidCallback? onLoaded}) {
     if (_adCache.containsKey(index) || _loadingIndices.contains(index)) {
-      return; // 🔸 Вже є або вантажиться
+      return;
     }
 
     _loadingIndices.add(index);
@@ -31,8 +37,10 @@ class NativeAdManager {
       listener: NativeAdListener(
         onAdLoaded: (ad) {
           debugPrint('✅ Native Ad Loaded for index $index');
+          onAdLoadedCallback?.call();
           _adCache[index] = ad as NativeAd;
           _loadingIndices.remove(index);
+          if (onLoaded != null) onLoaded(); // 🔹 Оновити UI
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint('❌ Failed to load Native Ad for index $index: $error');
@@ -53,19 +61,26 @@ class NativeAdManager {
   /// 🔹 Отримати віджет реклами з передачею висоти для фабрики
   static Widget getAdWidget(int index,
       {required double height, required VoidCallback refresh}) {
+    debugPrint(
+        '🔍 getAdWidget called for index $index — cache: ${_adCache.containsKey(index)}');
+    print(
+        '🔍 getAdWidget called for index $index — cache: ${_adCache.containsKey(index)}');
+
     if (_adCache.containsKey(index)) {
       final ad = _adCache[index]!;
       final adWidget = AdWidget(ad: ad);
 
-      // 🔸 Повертаємо віджет з заданою висотою
       return Container(
         height: height,
         padding: const EdgeInsets.all(4),
         child: adWidget,
       );
     } else {
-      loadAdForIndex(index); // 🔹 Завантажити, якщо ще нема
-      return SizedBox(height: height); // Placeholder з тією ж висотою
+      // 🔹 Завантажити, якщо ще нема
+      if (!_loadingIndices.contains(index)) {
+        loadAdForIndex(index, onLoaded: refresh);
+      }
+      return SizedBox(height: height); // Placeholder
     }
   }
 

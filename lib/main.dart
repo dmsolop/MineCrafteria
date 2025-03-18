@@ -419,6 +419,9 @@ class ModListScreenState extends State<ModListScreen>
             },
           ));
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
 
     return MaterialApp(
       title: 'Mods for Melon Playground',
