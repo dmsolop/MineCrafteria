@@ -39,32 +39,33 @@ class NativeAdManager {
           ad.dispose();
           _loadingIndices.remove(index);
         },
-        // onAdClosed: (ad) {
-        //   ad.dispose();
-        //   _adCache.remove(index);
-        //   loadAdForIndex(index); // 🔁 Перезавантажити
-        // },
+        onAdClosed: (ad) {
+          ad.dispose();
+          _adCache.remove(index);
+          loadAdForIndex(index); // 🔁 Перезавантажити
+        },
       ),
     );
 
     ad.load();
   }
 
-  /// 🔹 Отримати віджет реклами
-  static Widget getAdWidget(int index, {required VoidCallback refresh}) {
+  /// 🔹 Отримати віджет реклами з передачею висоти для фабрики
+  static Widget getAdWidget(int index,
+      {required double height, required VoidCallback refresh}) {
     if (_adCache.containsKey(index)) {
       final ad = _adCache[index]!;
       final adWidget = AdWidget(ad: ad);
 
-      // 🔸 Повертаємо віджет, реклама кешована
+      // 🔸 Повертаємо віджет з заданою висотою
       return Container(
-        height: 290,
+        height: height,
         padding: const EdgeInsets.all(4),
         child: adWidget,
       );
     } else {
       loadAdForIndex(index); // 🔹 Завантажити, якщо ще нема
-      return const SizedBox(height: 290); // Placeholder
+      return SizedBox(height: height); // Placeholder з тією ж висотою
     }
   }
 

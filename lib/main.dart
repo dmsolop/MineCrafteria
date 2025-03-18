@@ -665,6 +665,9 @@ class ModListScreenState extends State<ModListScreen>
                     color: ColorsInfo.GetColor(ColorType.Second),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
+                        double modItemHeight = 215; // Поточна висота модів
+                        double adItemHeight =
+                            modItemHeight; // Встановлюємо таку
                         return GridView.builder(
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 8),
@@ -673,7 +676,7 @@ class ModListScreenState extends State<ModListScreen>
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
-                            mainAxisExtent: 215,
+                            mainAxisExtent: modItemHeight,
                             childAspectRatio: 225 / 205,
                           ),
                           itemCount: modItems.length +
@@ -682,7 +685,7 @@ class ModListScreenState extends State<ModListScreen>
                             // 🔹 Показ реклами після кожних 5 модів (позиція 6, 12, 18…)
                             if ((index + 1) % 6 == 0) {
                               return NativeAdManager.getAdWidget(index,
-                                  refresh: () {
+                                  height: adItemHeight, refresh: () {
                                 setState(
                                     () {}); // 🔁 Оновити після завантаження реклами
                               });
