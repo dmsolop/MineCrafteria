@@ -14,35 +14,38 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
     override fun createNativeAd(nativeAd: NativeAd, customOptions: MutableMap<String, Any>?): NativeAdView {
         val adView = NativeAdView(context)
 
-        // 🔹 Основний контейнер – строго фіксована висота 290dp
-        val containerHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 290f, context.resources.displayMetrics).toInt()
+        // 🔹 Ширина екрану (для CTA висоти)
+        val screenWidthDp = context.resources.displayMetrics.widthPixels / context.resources.displayMetrics.density
+        val ctaHeightDp = if (screenWidthDp >= 600) 60f else 40f
+        val ctaHeightPx = dpToPx(ctaHeightDp)
+
+        // 🔹 Мінімальна висота: 120 (MediaView) + 15 (відступ) + CTA + 40 (padding)
+        val minHeightPx = dpToPx(120f + 15f + ctaHeightDp + 40f)
+
+        // 🔹 Контейнер реклами
         val container = RelativeLayout(context).apply {
-            setBackgroundColor(Color.parseColor("#252525"))
-            setPadding(20, 20, 20, 20)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                containerHeight
-            ).apply { setMargins(0, 0, 0, 20) }
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            )
+            minimumHeight = minHeightPx
+            setPadding(20, 20, 20, 20)  // padding = 20dp з кожного боку
             background = GradientDrawable().apply {
-                cornerRadius = 10f * context.resources.displayMetrics.density
+                cornerRadius = dpToPx(10f).toFloat()
                 setColor(Color.parseColor("#252525"))
             }
         }
 
-        // 🔹 Контейнер для MediaView (180x120dp)
+        // 🔹 MediaView 180x120dp
         val mediaContainer = FrameLayout(context).apply {
             id = View.generateViewId()
-            layoutParams = RelativeLayout.LayoutParams(
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180f, context.resources.displayMetrics).toInt(),
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 120f, context.resources.displayMetrics).toInt()
-            ).apply {
+            layoutParams = RelativeLayout.LayoutParams(dpToPx(180f), dpToPx(120f)).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_START)
                 addRule(RelativeLayout.ALIGN_PARENT_TOP)
             }
             clipChildren = true
         }
 
-        // 🔹 MediaView – строго фіксований розмір
         val mediaView = MediaView(context).apply {
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -53,7 +56,7 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
 
         mediaContainer.addView(mediaView)
 
-        // 🔹 Текстовий блок праворуч від MediaView
+        // 🔹 Текст справа від MediaView
         val textLayout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = RelativeLayout.LayoutParams(
@@ -62,11 +65,10 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             ).apply {
                 addRule(RelativeLayout.END_OF, mediaContainer.id)
                 addRule(RelativeLayout.ALIGN_TOP, mediaContainer.id)
-                marginStart = 20
+                marginStart = dpToPx(15f)
             }
         }
 
-        // 🔹 AD-значок
         val adLabel = TextView(context).apply {
             text = "AD"
             setTextColor(Color.WHITE)
@@ -75,7 +77,6 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             typeface = Typeface.DEFAULT_BOLD
         }
 
-        // 🔹 Headline
         val headline = TextView(context).apply {
             text = nativeAd.headline
             setTextColor(Color.WHITE)
@@ -86,27 +87,27 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
         textLayout.addView(adLabel)
         textLayout.addView(headline)
 
-        // 🔹 CTA-кнопка – прив'язка до низу контейнера
+        // 🔹 Кнопка CTA
         val callToAction = Button(context).apply {
             text = nativeAd.callToAction
-            setBackgroundColor(Color.parseColor("#586067"))
             setTextColor(Color.parseColor("#8D8D8D"))
             textSize = 16f
             typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
             layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50f, context.resources.displayMetrics).toInt()
+                ctaHeightPx
             ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                bottomMargin = 10
+                bottomMargin = dpToPx(15f)
             }
             background = GradientDrawable().apply {
-                cornerRadius = 15f * context.resources.displayMetrics.density
+                cornerRadius = dpToPx(10f).toFloat()
                 setColor(Color.parseColor("#586067"))
             }
         }
 
-        // 🔹 AdChoicesView у правому верхньому куті
+        // 🔹 AdChoicesView (обов’язковий для Google)
         val adChoicesView = AdChoicesView(context).apply {
             layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -117,24 +118,28 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             }
         }
 
-        // 🔹 Додавання в контейнер
+        // 🔹 Додаємо все в контейнер
         container.addView(mediaContainer)
-        container.addView(adChoicesView)
         container.addView(textLayout)
         container.addView(callToAction)
+        container.addView(adChoicesView)
 
-        // 🔹 Налаштування adView
+        // 🔹 Прив’язка до NativeAdView
         adView.mediaView = mediaView
         adView.headlineView = headline
         adView.callToActionView = callToAction
         adView.adChoicesView = adChoicesView
-
         adView.setNativeAd(nativeAd)
         adView.addView(container)
 
         return adView
     }
+
+    private fun dpToPx(dp: Float): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp,
+            context.resources.displayMetrics
+        ).toInt()
+    }
 }
-
-
-
