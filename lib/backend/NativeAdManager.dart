@@ -58,8 +58,8 @@ class NativeAdManager {
 
       // 🔸 Повертаємо віджет, реклама кешована
       return Container(
-        height: 290,
-        padding: const EdgeInsets.all(8),
+        constraints: const BoxConstraints(minHeight: 290),
+        padding: const EdgeInsets.all(4),
         child: adWidget,
       );
     } else {

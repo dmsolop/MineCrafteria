@@ -1,88 +1,140 @@
 package com.test.mods
 
 import android.content.Context
+import android.graphics.*
+import android.graphics.drawable.GradientDrawable
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.View
-import android.view.LayoutInflater
-import android.view.ViewGroup.LayoutParams
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.graphics.Color
-import android.graphics.Typeface
-import com.google.android.gms.ads.nativead.NativeAd
-import com.google.android.gms.ads.nativead.NativeAdView
-import com.google.android.gms.ads.nativead.NativeAdOptions
-import com.google.android.gms.ads.nativead.NativeAd.Image
-import com.google.android.gms.ads.nativead.MediaView
-import com.google.android.gms.ads.AdLoader
+import android.widget.*
+import com.google.android.gms.ads.nativead.*
 import io.flutter.plugins.googlemobileads.GoogleMobileAdsPlugin.NativeAdFactory
-
 
 class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
     override fun createNativeAd(nativeAd: NativeAd, customOptions: MutableMap<String, Any>?): NativeAdView {
         val adView = NativeAdView(context)
 
-        // Container layout
-        val container = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
+        // 🔹 Основний контейнер – строго фіксована висота 290dp
+        val containerHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 290f, context.resources.displayMetrics).toInt()
+        val container = RelativeLayout(context).apply {
+            setBackgroundColor(Color.parseColor("#252525"))
             setPadding(20, 20, 20, 20)
-            setBackgroundColor(Color.WHITE)
-        }
-
-        // Headline
-        val headline = TextView(context).apply {
-            text = nativeAd.headline
-            textSize = 16f
-            setTypeface(null, Typeface.BOLD)
-            setTextColor(Color.BLACK)
-        }
-
-        // Image (main)
-        //val imageView = ImageView(context).apply {
-        //    nativeAd.images.firstOrNull()?.drawable?.let { setImageDrawable(it) }
-        //    layoutParams = LinearLayout.LayoutParams(
-        //        LinearLayout.LayoutParams.MATCH_PARENT,
-        //        250
-        //    ).apply { setMargins(0, 10, 0, 10) }
-        //    scaleType = ImageView.ScaleType.CENTER_CROP
-        //}
-
-        // MediaView (for the main image or video)
-        val mediaView = MediaView(context).apply {
-            nativeAd.mediaContent?.let { setMediaContent(it) }
-
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                250
-            ).apply {
-                setMargins(0, 10, 0, 10)
+                containerHeight
+            ).apply { setMargins(0, 0, 0, 20) }
+            background = GradientDrawable().apply {
+                cornerRadius = 10f * context.resources.displayMetrics.density
+                setColor(Color.parseColor("#252525"))
             }
         }
 
+        // 🔹 Контейнер для MediaView (180x120dp)
+        val mediaContainer = FrameLayout(context).apply {
+            id = View.generateViewId()
+            layoutParams = RelativeLayout.LayoutParams(
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180f, context.resources.displayMetrics).toInt(),
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 120f, context.resources.displayMetrics).toInt()
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_START)
+                addRule(RelativeLayout.ALIGN_PARENT_TOP)
+            }
+            clipChildren = true
+        }
 
-        // CTA Button
+        // 🔹 MediaView – строго фіксований розмір
+        val mediaView = MediaView(context).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            )
+            nativeAd.mediaContent?.let { mediaContent = it }
+        }
+
+        mediaContainer.addView(mediaView)
+
+        // 🔹 Текстовий блок праворуч від MediaView
+        val textLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.END_OF, mediaContainer.id)
+                addRule(RelativeLayout.ALIGN_TOP, mediaContainer.id)
+                marginStart = 20
+            }
+        }
+
+        // 🔹 AD-значок
+        val adLabel = TextView(context).apply {
+            text = "AD"
+            setTextColor(Color.WHITE)
+            textSize = 12f
+            alpha = 0.7f
+            typeface = Typeface.DEFAULT_BOLD
+        }
+
+        // 🔹 Headline
+        val headline = TextView(context).apply {
+            text = nativeAd.headline
+            setTextColor(Color.WHITE)
+            textSize = 16f
+            typeface = Typeface.DEFAULT_BOLD
+        }
+
+        textLayout.addView(adLabel)
+        textLayout.addView(headline)
+
+        // 🔹 CTA-кнопка – прив'язка до низу контейнера
         val callToAction = Button(context).apply {
             text = nativeAd.callToAction
             setBackgroundColor(Color.parseColor("#586067"))
-            setTextColor(Color.WHITE)
-            textSize = 14f
+            setTextColor(Color.parseColor("#8D8D8D"))
+            textSize = 16f
+            typeface = Typeface.DEFAULT_BOLD
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 50f, context.resources.displayMetrics).toInt()
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                bottomMargin = 10
+            }
+            background = GradientDrawable().apply {
+                cornerRadius = 15f * context.resources.displayMetrics.density
+                setColor(Color.parseColor("#586067"))
+            }
         }
 
-        // Add views to container
-        container.addView(mediaView)
-        container.addView(headline)
+        // 🔹 AdChoicesView у правому верхньому куті
+        val adChoicesView = AdChoicesView(context).apply {
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_TOP)
+                addRule(RelativeLayout.ALIGN_PARENT_END)
+            }
+        }
+
+        // 🔹 Додавання в контейнер
+        container.addView(mediaContainer)
+        container.addView(adChoicesView)
+        container.addView(textLayout)
         container.addView(callToAction)
 
-        // Set native ad elements
+        // 🔹 Налаштування adView
         adView.mediaView = mediaView
         adView.headlineView = headline
         adView.callToActionView = callToAction
-        adView.setNativeAd(nativeAd)
+        adView.adChoicesView = adChoicesView
 
+        adView.setNativeAd(nativeAd)
         adView.addView(container)
 
         return adView
     }
 }
+
+
+
