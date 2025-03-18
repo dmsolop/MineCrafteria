@@ -163,6 +163,15 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
         adView.adChoicesView = adChoicesView
 
         adView.setNativeAd(nativeAd)
+
+        mediaView.isClickable = false
+        headline.isClickable = false
+        bodyText.isClickable = false
+        adLabel.isClickable = false
+        scrollableText.isClickable = false
+        textLayout.isClickable = false
+        container.isClickable = false
+
         adView.addView(container)
 
         return adView
