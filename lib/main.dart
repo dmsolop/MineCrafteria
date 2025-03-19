@@ -37,8 +37,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(); // Firebase initialization
-  MobileAds.instance.initialize(); // AdMob initialization
-  NativeAdManager.preLoadAd(); //Loading native ads
+  NativeAdManager.preLoadAd();
 
   if (Platform.isAndroid || Platform.isIOS) {
     bool isTabletDevice = await isTablet();
@@ -97,53 +96,30 @@ void main() async {
   runApp(const RestartWidget(ModListApp()));
 }
 
-// Future<void> fetchRemoteConfig() async {
-//   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
-
-//   await remoteConfig.setConfigSettings(RemoteConfigSettings(
-//     fetchTimeout: const Duration(seconds: 10),
-//     minimumFetchInterval: const Duration(hours: 1),
-//   ));
-
-//   try {
-//     await remoteConfig.fetchAndActivate(); // Downloading and activating updates
-
-//     bool enableAds = remoteConfig.getBool("enable_ads");
-
-//     // Call CAS initialization only after receiving configuration
-//     if (enableAds) {
-//       print("Firebase Remote Config received. enable_ads: $enableAds");
-//       AdManager.initialize();
-//     }
-//   } catch (e) {
-//     print("Firebase Remote Config download error: $e");
-//   }
-// }
-
 Future<void> fetchRemoteConfig() async {
   final FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.instance;
 
   await remoteConfig.setConfigSettings(RemoteConfigSettings(
     fetchTimeout: const Duration(seconds: 10),
-    minimumFetchInterval:
-        Duration.zero, // Примусове оновлення при кожному запуску
+    minimumFetchInterval: Duration.zero, // Forced update on every launch
   ));
 
   try {
     await remoteConfig.fetchAndActivate();
 
-    // Виведемо весь конфіг для перевірки
     Map<String, dynamic> allParams = remoteConfig.getAll();
-    print("🔥 Remote Config Parameters: $allParams");
+    debugPrint("🔥 Remote Config Parameters: $allParams");
 
     bool enableAds = remoteConfig.getBool("enable_ads");
-    print("✅ Firebase Remote Config received. enable_ads: $enableAds");
+    debugPrint("✅ Firebase Remote Config received. enable_ads: $enableAds");
 
-    if (enableAds) {
+    AdConfig.isAdsEnabled = enableAds;
+    if (AdConfig.isAdsEnabled) {
       AdManager.initialize();
+      MobileAds.instance.initialize();
     }
   } catch (e) {
-    print("❌ Помилка завантаження Remote Config: $e");
+    debugPrint("❌ Remote Config download error: $e");
   }
 }
 
@@ -185,8 +161,8 @@ Future<void> init() async {
 
   // ColorsInfo.IsDark = isDarkSaved;
   await Future.delayed(Duration(milliseconds: 500));
-  await fetchRemoteConfig(); // Getting settings before launching CAS
-  // AdManager.initialize();
+
+  await fetchRemoteConfig(); // Getting settings before launching CAS and nativeAd
 
   modService = ModService();
   modService!.mods = await modService!.fetchModItems();
@@ -302,6 +278,7 @@ class ModListScreenState extends State<ModListScreen>
     _scrollController.dispose(); // Dispose the scroll controller
     _controller.dispose();
     NativeAdManager.disposeAllAds();
+    NativeAdManager.setOnAdLoadedCallback(() {});
     super.dispose();
   }
 
@@ -668,9 +645,8 @@ class ModListScreenState extends State<ModListScreen>
                     color: ColorsInfo.GetColor(ColorType.Second),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        double modItemHeight = 215; // Поточна висота модів
-                        double adItemHeight =
-                            modItemHeight; // Встановлюємо таку
+                        double modItemHeight = 215; // Current mod height
+                        double adItemHeight = modItemHeight;
                         return GridView.builder(
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 8),
@@ -682,22 +658,22 @@ class ModListScreenState extends State<ModListScreen>
                             mainAxisExtent: modItemHeight,
                             childAspectRatio: 225 / 205,
                           ),
-                          itemCount: modItems.length +
-                              (modItems.length ~/ 5), // 🔹 Враховуємо рекламу
+                          itemCount: NativeAdManager.getTotalItemCount(
+                              modItems.length),
                           itemBuilder: (context, index) {
-                            // 🔹 Показ реклами після кожних 5 модів (позиція 6, 12, 18…)
-                            if ((index + 1) % 6 == 0) {
+                            // Showing ads after every 5 mods (position 6, 12, 18…)
+                            if (NativeAdManager.isAdIndex(index)) {
                               return NativeAdManager.getAdWidget(index,
                                   height: adItemHeight, refresh: () {
-                                setState(
-                                    () {}); // 🔁 Оновити після завантаження реклами
+                                setState(() {});
                               });
                             }
 
-                            // 🔹 Реальний індекс модів (без врахування реклами)
-                            int actualIndex = index - (index ~/ 6);
+                            // Real mod index (excluding advertising)
+                            int actualIndex =
+                                NativeAdManager.getRealModIndex(index);
 
-                            // 🔹 Захист від виходу за межі масиву
+                            // Protection against going outside the array boundaries
                             if (actualIndex >= modItems.length) {
                               return const SizedBox.shrink();
                             }
@@ -705,37 +681,42 @@ class ModListScreenState extends State<ModListScreen>
                             return SizedBox(
                               child: InkWell(
                                 onTap: () async {
-                                  // 🔸 Логіка Interstitial реклами
-                                  if (AdManager.nextTimeInterstitial == null) {
-                                    if (await AdManager.manager!
-                                        .isInterstitialReady()) {
-                                      AdManager.interstitialListener =
-                                          InterstitialListener();
-                                      await AdManager.manager!.showInterstitial(
-                                          AdManager.interstitialListener!);
-                                      await waitWhile(() => AdManager
-                                          .interstitialListener!.adEnded);
-                                      AdManager.nextTimeInterstitial =
-                                          DateTime.now()
-                                              .add(const Duration(seconds: 60));
-                                    }
-                                  } else if (AdManager.nextTimeInterstitial!
-                                      .isBefore(DateTime.now())) {
-                                    if (await AdManager.manager!
-                                        .isInterstitialReady()) {
-                                      AdManager.interstitialListener =
-                                          InterstitialListener();
-                                      await AdManager.manager!.showInterstitial(
-                                          AdManager.interstitialListener!);
-                                      await waitWhile(() => AdManager
-                                          .interstitialListener!.adEnded);
-                                      AdManager.nextTimeInterstitial =
-                                          DateTime.now()
-                                              .add(const Duration(seconds: 60));
+                                  if (AdConfig.isAdsEnabled) {
+                                    // Interstitial advertising
+                                    if (AdManager.nextTimeInterstitial ==
+                                        null) {
+                                      if (await AdManager.manager!
+                                          .isInterstitialReady()) {
+                                        AdManager.interstitialListener =
+                                            InterstitialListener();
+                                        await AdManager.manager!
+                                            .showInterstitial(AdManager
+                                                .interstitialListener!);
+                                        await waitWhile(() => AdManager
+                                            .interstitialListener!.adEnded);
+                                        AdManager.nextTimeInterstitial =
+                                            DateTime.now().add(
+                                                const Duration(seconds: 60));
+                                      }
+                                    } else if (AdManager.nextTimeInterstitial!
+                                        .isBefore(DateTime.now())) {
+                                      if (await AdManager.manager!
+                                          .isInterstitialReady()) {
+                                        AdManager.interstitialListener =
+                                            InterstitialListener();
+                                        await AdManager.manager!
+                                            .showInterstitial(AdManager
+                                                .interstitialListener!);
+                                        await waitWhile(() => AdManager
+                                            .interstitialListener!.adEnded);
+                                        AdManager.nextTimeInterstitial =
+                                            DateTime.now().add(
+                                                const Duration(seconds: 60));
+                                      }
                                     }
                                   }
 
-                                  // 🔸 Переходи між екранами
+                                  // Go to the mod details screen
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -784,121 +765,6 @@ class ModListScreenState extends State<ModListScreen>
                             );
                           },
                         );
-
-                        // return GridView.builder(
-                        //   padding: const EdgeInsets.symmetric(
-                        //       vertical: 16, horizontal: 8),
-                        //   gridDelegate:
-                        //       SliverGridDelegateWithFixedCrossAxisCount(
-                        //     crossAxisCount: crossAxisCount,
-                        //     crossAxisSpacing: 8,
-                        //     mainAxisSpacing: 8,
-                        //     mainAxisExtent: 215,
-                        //     childAspectRatio: 225 / 205,
-                        //   ),
-                        //   //  itemCount: SubscriptionManager.isPremiumUser ? modItems.length : (modItems.length + (modItems.length ~/ 5)),
-                        //   itemBuilder: (context, index) {
-                        //     // 🔹 Загальна кількість елементів (моди + реклама)
-                        //     int totalItems =
-                        //         modItems.length + (modItems.length ~/ 5);
-
-                        //     // 🔹 Якщо індекс перевищує загальну кількість, припиняємо рендер (щоб уникнути пустих місць)
-                        //     if (index >= totalItems) {
-                        //       return null;
-                        //     }
-
-                        //     // 🔹 Вставка реклами кожні 5 елементів
-                        //     if ((index + 1) % 6 == 0) {
-                        //       return NativeAdManager.getNativeAdWidget();
-                        //     }
-
-                        //     // 🔹 Розрахунок правильного `actualIndex` для модів
-                        //     int actualIndex = index - (index ~/ 6);
-
-                        //     // 🔹 Переконаємось, що ми не виходимо за межі `modItems`
-                        //     if (actualIndex >= modItems.length) {
-                        //       return const SizedBox.shrink();
-                        //     }
-
-                        //     return SizedBox(
-                        //       child: InkWell(
-                        //         onTap: () async {
-                        //           if (AdManager.nextTimeInterstitial == null) {
-                        //             if (await AdManager.manager!
-                        //                 .isInterstitialReady()) {
-                        //               AdManager.interstitialListener =
-                        //                   InterstitialListener();
-                        //               await AdManager.manager!.showInterstitial(
-                        //                   AdManager.interstitialListener!);
-                        //               await waitWhile(() => AdManager
-                        //                   .interstitialListener!.adEnded);
-                        //               AdManager.nextTimeInterstitial =
-                        //                   DateTime.now()
-                        //                       .add(const Duration(seconds: 60));
-                        //             }
-                        //           } else if (AdManager.nextTimeInterstitial!
-                        //               .isBefore(DateTime.now())) {
-                        //             if (await AdManager.manager!
-                        //                 .isInterstitialReady()) {
-                        //               AdManager.interstitialListener =
-                        //                   InterstitialListener();
-                        //               await AdManager.manager!.showInterstitial(
-                        //                   AdManager.interstitialListener!);
-                        //               await waitWhile(() => AdManager
-                        //                   .interstitialListener!.adEnded);
-                        //               AdManager.nextTimeInterstitial =
-                        //                   DateTime.now()
-                        //                       .add(const Duration(seconds: 60));
-                        //             }
-                        //           }
-
-                        //           Navigator.push(
-                        //             context,
-                        //             MaterialPageRoute(
-                        //               builder: (context) => screenWidth > 700
-                        //                   ? ModDetailScreenPadWidget(
-                        //                       modItem: modItems[actualIndex],
-                        //                       modListScreen: this,
-                        //                       favoritesListScreen: null,
-                        //                       modListIndex:
-                        //                           _activeCategoryIndex,
-                        //                     )
-                        //                   : ModDetailScreenWidget(
-                        //                       modItem: modItems[actualIndex],
-                        //                       modListScreen: this,
-                        //                       favoritesListScreen: null,
-                        //                       modListIndex:
-                        //                           _activeCategoryIndex,
-                        //                     ),
-                        //             ),
-                        //           );
-                        //         },
-                        //         child: VisibilityDetector(
-                        //           key: Key(modItems[actualIndex].imageUrl +
-                        //               modItems[actualIndex]
-                        //                   .isFirestoreChecked
-                        //                   .toString()),
-                        //           onVisibilityChanged: (visibility) async {
-                        //             if (visibility.visibleFraction > 0 &&
-                        //                 !modItems[actualIndex]
-                        //                     .isFirestoreChecked) {
-                        //             } else if (visibility.visibleFraction > 0) {
-                        //               bool cached =
-                        //                   await CacheManager.isCacheAvailable(
-                        //                       modItems[actualIndex]
-                        //                           .downloadURL);
-                        //               setState(() {
-                        //                 modItems[actualIndex].cached = cached;
-                        //               });
-                        //             }
-                        //           },
-                        //           child: ModItem(
-                        //               modItemData: modItems[actualIndex]),
-                        //         ),
-                        //       ),
-                        //     );
-                        //   },
-                        // );
                       },
                     ),
                   );

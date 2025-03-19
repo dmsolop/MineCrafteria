@@ -11,7 +11,6 @@ import android.widget.*
 import com.google.android.gms.ads.nativead.*
 import io.flutter.plugins.googlemobileads.GoogleMobileAdsPlugin.NativeAdFactory
 
-// 🔹 Перевід dp у px
 fun Int.toPx(context: Context): Int {
     return TypedValue.applyDimension(
         TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics
@@ -22,16 +21,16 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
     override fun createNativeAd(nativeAd: NativeAd, customOptions: MutableMap<String, Any>?): NativeAdView {
         val adView = NativeAdView(context)
 
-        // 🔹 Визначення висоти CTA-кнопки
+        // Determining the height of the CTA button
         val screenWidthDp = context.resources.displayMetrics.widthPixels / context.resources.displayMetrics.density
         val ctaHeightDp = if (screenWidthDp >= 600) 60f else 40f
         val ctaHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ctaHeightDp, context.resources.displayMetrics).toInt()
 
-        // 🔹 Мінімальна висота: MediaView + padding + CTA + padding контейнера
+        // Minimum height: MediaView + padding + CTA + container padding
         val minHeightDp = 120f + 15f + ctaHeightDp + 30f
         val minHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, minHeightDp, context.resources.displayMetrics).toInt()
 
-        // 🔹 Основний контейнер
+        // Main container
         val container = RelativeLayout(context).apply {
             setBackgroundColor(Color.parseColor("#252525"))
             setPadding(10.toPx(context), 10.toPx(context), 10.toPx(context), 10.toPx(context))
@@ -45,7 +44,7 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             }
         }
 
-        // 🔹 MediaContainer 180x120dp
+        // MediaContainer 180x120dp
         val mediaContainer = FrameLayout(context).apply {
             id = View.generateViewId()
             layoutParams = RelativeLayout.LayoutParams(
@@ -67,7 +66,7 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
 
         mediaContainer.addView(mediaView)
 
-        // 🔹 AD Label
+        // AD Label
         val adLabel = TextView(context).apply {
             text = "AD"
             setTextColor(Color.WHITE)
@@ -77,7 +76,7 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             id = View.generateViewId()
         }
 
-        // 🔹 Headline + Body
+        // Headline + Body
         val headline = TextView(context).apply {
             text = nativeAd.headline
             setTextColor(Color.WHITE)

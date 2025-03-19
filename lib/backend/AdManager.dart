@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:morph_mods/frontend/ColorsInfo.dart';
 
+class AdConfig {
+  static bool isAdsEnabled = true;
+}
+
 class AdManager {
   static MediationManager? manager;
   static InterstitialListener? interstitialListener;
