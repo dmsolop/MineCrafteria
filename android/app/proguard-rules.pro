@@ -24,3 +24,13 @@
 # Ensure SplitCompatApplication is not removed
 -keep class com.google.android.play.core.splitcompat.SplitCompatApplication { *; }
 
+# Flutter
+-dontwarn io.flutter.embedding.**
+
+# Google Mobile Ads
+-keep class com.google.android.gms.ads.** { *; }
+-dontwarn com.google.android.gms.ads.**
+
+# Firebase
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
