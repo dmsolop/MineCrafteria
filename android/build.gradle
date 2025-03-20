@@ -1,11 +1,28 @@
 buildscript {
     ext.kotlin_version = '1.9.20'
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.1' 
+        classpath 'com.google.gms:google-services:4.4.2'
+    }
 }
 
-plugins {
-  // Add the dependency for the Google services Gradle plugin
-  id 'com.google.gms.google-services' version '4.4.2' apply false
+ext {
+    cas_version = '3.9.10'
+    cas_google_adapter = '23.6.0.0'
 }
+
+// plugins {
+//     id 'com.android.application' version '8.2.1' apply false
+//     id 'com.android.library' version '8.2.1' apply false
+//     // Add the dependency for the Google services Gradle plugin
+//     id 'com.google.gms.google-services' version '4.4.2' apply false
+// }
 
 allprojects {
     repositories {

@@ -13,10 +13,10 @@ packages:
     dependency: "direct main"
     description:
       name: appcheck
-      sha256: "531ae96307c7362ceeeb92ab6ec229cca937ce1bda63f2a7d0319f91958df09e"
+      sha256: "6971b1ae5833b15b1abc29f7d03d08db79577b2934ceb34fe39ab937b53c2f17"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.3"
+    version: "1.5.4+1"
   archive:
     dependency: "direct main"
     description:
@@ -29,18 +29,18 @@ packages:
     dependency: transitive
     description:
       name: args
-      sha256: bf9f5caeea8d8fe6721a9c358dd8a5c1947b27f1cfaa18b39c301273594919e6
+      sha256: d0481093c50b1da8910eb0bb301626d4d8eb7284aa739614d2b394ee09e3ea04
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.0"
+    version: "2.7.0"
   asn1lib:
     dependency: transitive
     description:
       name: asn1lib
-      sha256: "4bae5ae63e6d6dd17c4aac8086f3dec26c0236f6a0f03416c6c19d830c367cf5"
+      sha256: "1c296cd268f486cabcc3930e9b93a8133169305f18d722916e675959a88f6d2c"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.8"
+    version: "1.5.9"
   async:
     dependency: transitive
     description:
@@ -101,10 +101,10 @@ packages:
     dependency: "direct main"
     description:
       name: clever_ads_solutions
-      sha256: "92119293884b91a20aacf000dc8347ad7de0902508848bd8c02e5937c0e6d177"
+      sha256: "6d1c9c44bc68fbc0910172210cc2952766adb30e9df09e5fd4e6a1717f08d915"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.3"
+    version: "0.7.6"
   cli_util:
     dependency: transitive
     description:
@@ -529,10 +529,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: "4adf4fd5423ec60a29506c76581bc05854c55e3a0b72d35bb28d661c9686edf2"
+      sha256: "0ca7359dad67fd7063cb2892ab0c0737b2daafd807cf1acecd62374c8fae6c12"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.15"
+    version: "2.2.16"
   path_provider_foundation:
     dependency: transitive
     description:
@@ -657,18 +657,18 @@ packages:
     dependency: "direct main"
     description:
       name: shared_preferences
-      sha256: "688ee90fbfb6989c980254a56cb26ebe9bb30a3a2dff439a78894211f73de67a"
+      sha256: "846849e3e9b68f3ef4b60c60cf4b3e02e9321bc7f4d8c4692cf87ffa82fc8a3a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.1"
+    version: "2.5.2"
   shared_preferences_android:
     dependency: transitive
     description:
       name: shared_preferences_android
-      sha256: "650584dcc0a39856f369782874e562efd002a9c94aec032412c9eb81419cce1f"
+      sha256: "3ec7210872c4ba945e3244982918e502fa2bfb5230dff6832459ca0e1879b7ad"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.4"
+    version: "2.4.8"
   shared_preferences_foundation:
     dependency: transitive
     description:
@@ -697,10 +697,10 @@ packages:
     dependency: transitive
     description:
       name: shared_preferences_web
-      sha256: d2ca4132d3946fec2184261726b355836a82c33d7d5b67af32692aff18a4684e
+      sha256: c49bd060261c9a3f0ff445892695d6212ff603ef3115edbb448509d407600019
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.2"
+    version: "2.4.3"
   shared_preferences_windows:
     dependency: transitive
     description:
@@ -806,10 +806,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_android
-      sha256: "6fc2f56536ee873eeb867ad176ae15f304ccccc357848b351f6f0d8d4a40d193"
+      sha256: "1d0eae19bd7606ef60fe69ef3b312a437a16549476c42321d5dc1506c9ca3bf4"
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.14"
+    version: "6.3.15"
   url_launcher_ios:
     dependency: transitive
     description:
