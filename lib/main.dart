@@ -27,7 +27,7 @@ import 'package:flutter/foundation.dart' show PlatformDispatcher, kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'backend/NativeAdManager.dart';
+import 'backend/native_ads/NativeAdManager.dart';
 
 //test gap
 final FlutterLocalization localization = FlutterLocalization.instance;
@@ -37,7 +37,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(); // Firebase initialization
-  NativeAdManager.preLoadAd();
+  NativeAdManager().preLoadAd();
 
   if (Platform.isAndroid || Platform.isIOS) {
     bool isTabletDevice = await isTablet();
@@ -113,7 +113,7 @@ Future<void> fetchRemoteConfig() async {
     bool enableAds = remoteConfig.getBool("enable_ads");
     debugPrint("✅ Firebase Remote Config received. enable_ads: $enableAds");
 
-    AdConfig.isAdsEnabled = enableAds;
+    AdConfig.isAdsEnabled = false; //enableAds;
     if (AdConfig.isAdsEnabled) {
       AdManager.initialize();
       MobileAds.instance.initialize();
@@ -277,8 +277,7 @@ class ModListScreenState extends State<ModListScreen>
     _searchController.dispose();
     _scrollController.dispose(); // Dispose the scroll controller
     _controller.dispose();
-    NativeAdManager.disposeAllAds();
-    NativeAdManager.setOnAdLoadedCallback(() {});
+    NativeAdManager().disposeAllAds();
     super.dispose();
   }
 
@@ -658,12 +657,21 @@ class ModListScreenState extends State<ModListScreen>
                             mainAxisExtent: modItemHeight,
                             childAspectRatio: 225 / 205,
                           ),
-                          itemCount: NativeAdManager.getTotalItemCount(
-                              modItems.length),
+                          itemCount: NativeAdManager()
+                              .getTotalItemCount(modItems.length),
                           itemBuilder: (context, index) {
-                            // Showing ads after every 5 mods (position 6, 12, 18…)
-                            if (NativeAdManager.isAdIndex(index)) {
-                              return NativeAdManager.getAdWidget(index,
+                            // // Showing ads after every 5 mods (position 6, 12, 18…)
+                            // if (NativeAdManager().isAdIndex(index)) {
+                            //   return NativeAdManager().getAdWidget(index,
+                            //       height: adItemHeight, refresh: () {
+                            //     setState(() {});
+                            //   });
+
+                            if (NativeAdManager().isAdIndex(index)) {
+                              NativeAdManager().maybePreloadAds(
+                                  index, modItems.length); // 👈 Один виклик
+
+                              return NativeAdManager().getAdWidget(index,
                                   height: adItemHeight, refresh: () {
                                 setState(() {});
                               });
@@ -671,7 +679,7 @@ class ModListScreenState extends State<ModListScreen>
 
                             // Real mod index (excluding advertising)
                             int actualIndex =
-                                NativeAdManager.getRealModIndex(index);
+                                NativeAdManager().getRealModIndex(index);
 
                             // Protection against going outside the array boundaries
                             if (actualIndex >= modItems.length) {
