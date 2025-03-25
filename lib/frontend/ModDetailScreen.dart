@@ -30,6 +30,7 @@ import 'package:share_plus/share_plus.dart';
 import 'LoadingDialog.dart';
 import 'package:path/path.dart' as p;
 import '../backend/native_ads/SingleNativeAdLoader.dart';
+import '../frontend/widgets/ModScreenshotGallery.dart';
 
 bool hideDescription = false;
 
@@ -179,14 +180,15 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  constraints: const BoxConstraints(maxWidth: 349, maxHeight: 243),
-                  child: Image.network(
-                    modItem.imageUrl,
-                    headers: {"CF-Access-Client-Secret": AccessKeys.client_secret, "CF-Access-Client-Id": AccessKeys.client_id},
-                    fit: BoxFit.fill,
-                    width: 349,
-                    height: 243,
-                  ),
+                  // constraints: const BoxConstraints(maxWidth: 349, maxHeight: 243),
+                  child: ModScreenshotGallery(screenshots: modItem.screenshots),
+                  // child: Image.network(
+                  //   modItem.imageUrl,
+                  //   headers: {"CF-Access-Client-Secret": AccessKeys.client_secret, "CF-Access-Client-Id": AccessKeys.client_id},
+                  //   fit: BoxFit.fill,
+                  //   width: 349,
+                  //   height: 243,
+                  // ),
                 ),
                 const SizedBox(height: 16),
                 Row(
