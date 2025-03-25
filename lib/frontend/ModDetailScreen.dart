@@ -570,37 +570,39 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 const SizedBox(
                   height: 5,
                 ),
+
                 Container(
-                  color: ColorsInfo.GetColor(ColorType.Second),
-                  child: Column(
-                    children: [
-                      Row(
+                    color: ColorsInfo.GetColor(ColorType.Second),
+                    child: SingleChildScrollView(
+                      child: Column(
                         children: [
-                          getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                          getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                          Row(
+                            children: [
+                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                            ],
+                          ),
                         ],
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        children: [
-                          getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                          getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        children: [
-                          getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                          getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
+                    ))
               ],
             ),
           ),
@@ -619,8 +621,8 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
 
   Widget getMiniMod(ModItemData modItem, ModListScreenState? modListState, FavoritesModListScreenState? favListState, BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width / 2.18,
-      height: 189,
+      width: MediaQuery.of(context).size.width / 2.2,
+      height: 197,
       child: InkWell(
           onTap: () {
             Navigator.push(
