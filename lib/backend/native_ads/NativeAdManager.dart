@@ -17,6 +17,10 @@ class NativeAdManager {
   int _lastPreloadedAdIndex = 17; // 🔹 5,11,17 — preloaded by default
   static const String _adUnitId = AccessKeys.adUnitId; // 🔹 Як у проекті
 
+  bool isAdLoaded(int index) {
+    return _adLoadedFlags[index] == true;
+  }
+
   // 🔹 Перевірити: чи цей індекс — реклама
   bool isAdIndex(int index) {
     if (!AdConfig.isAdsEnabled) return false; // 🔹 захист

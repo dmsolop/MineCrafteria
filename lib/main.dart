@@ -28,6 +28,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'backend/native_ads/NativeAdManager.dart';
+import 'backend/native_ads/AdFlowManager.dart';
 
 //test gap
 final FlutterLocalization localization = FlutterLocalization.instance;
@@ -84,10 +85,7 @@ void main() async {
       MapLocale('es', AppLocale.ES),
       MapLocale('de', AppLocale.DE),
     ],
-    initLanguageCode: currentLangs.contains(
-            Platform.localeName.substring(0, Platform.localeName.indexOf('_')))
-        ? Platform.localeName.substring(0, Platform.localeName.indexOf('_'))
-        : "en",
+    initLanguageCode: currentLangs.contains(Platform.localeName.substring(0, Platform.localeName.indexOf('_'))) ? Platform.localeName.substring(0, Platform.localeName.indexOf('_')) : "en",
   );
 
   localization.onTranslatedLanguage = _onTranslatedLanguage;
@@ -113,7 +111,7 @@ Future<void> fetchRemoteConfig() async {
     bool enableAds = remoteConfig.getBool("enable_ads");
     debugPrint("✅ Firebase Remote Config received. enable_ads: $enableAds");
 
-    AdConfig.isAdsEnabled = false; //enableAds;
+    AdConfig.isAdsEnabled = enableAds;
     if (AdConfig.isAdsEnabled) {
       AdManager.initialize();
       MobileAds.instance.initialize();
@@ -129,8 +127,7 @@ Future<bool> isTablet() async {
 
   if (Platform.isAndroid) {
     var androidInfo = await deviceInfo.androidInfo;
-    isTablet =
-        androidInfo.systemFeatures.contains('android.hardware.type.tablet');
+    isTablet = androidInfo.systemFeatures.contains('android.hardware.type.tablet');
   } else if (Platform.isIOS) {
     var iosInfo = await deviceInfo.iosInfo;
     isTablet = iosInfo.model.toLowerCase().contains('ipad');
@@ -146,17 +143,14 @@ Future<void> init() async {
 
   ModService.sharedPreferences = await SharedPreferences.getInstance();
 
-  var brightness =
-      SchedulerBinding.instance.platformDispatcher.platformBrightness;
+  var brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
   bool isDarkMode = brightness == Brightness.dark;
 
   var defaultColorValue = isDarkMode;
 
-  final isDarkSaved = ModService.sharedPreferences!.getBool("color_is_dark") ??
-      defaultColorValue;
+  final isDarkSaved = ModService.sharedPreferences!.getBool("color_is_dark") ?? defaultColorValue;
   if (!ModService.sharedPreferences!.containsKey("color_is_dark")) {
-    await ModService.sharedPreferences!
-        .setBool("color_is_dark", defaultColorValue);
+    await ModService.sharedPreferences!.setBool("color_is_dark", defaultColorValue);
   }
 
   // ColorsInfo.IsDark = isDarkSaved;
@@ -212,8 +206,7 @@ String searchText = "";
 String version = "";
 bool isPremShown = false;
 
-class ModListScreenState extends State<ModListScreen>
-    with SingleTickerProviderStateMixin {
+class ModListScreenState extends State<ModListScreen> with SingleTickerProviderStateMixin {
   final List<Image> _categoryIcons = [
     Image.asset('assets/images/morph_icon.png'),
     Image.asset('assets/images/all_mods_category.png'),
@@ -264,8 +257,7 @@ class ModListScreenState extends State<ModListScreen>
 
   void _scrollToActiveCategory() {
     _scrollController.animateTo(
-      _activeCategoryIndex *
-          70.0, // Assume each category item has a width of 100.0
+      _activeCategoryIndex * 70.0, // Assume each category item has a width of 100.0
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
@@ -306,8 +298,7 @@ class ModListScreenState extends State<ModListScreen>
     double screenHeight = MediaQuery.of(context).size.height;
     int crossAxisCount = screenWidth > 700 ? 3 : (screenWidth < 500 ? 1 : 2);
 
-    if ((modService != null ? modService!.mods.isEmpty : true) &&
-        !isPremShown) {
+    if ((modService != null ? modService!.mods.isEmpty : true) && !isPremShown) {
       return Scaffold(
           backgroundColor: HexColor.fromHex("#25292e"),
           body: VisibilityDetector(
@@ -318,12 +309,7 @@ class ModListScreenState extends State<ModListScreen>
                 Align(
                   alignment: Alignment.center,
                   child: SizedBox(
-                      width: MediaQuery.of(context).size.width > 700
-                          ? MediaQuery.sizeOf(context).width * 0.85
-                          : MediaQuery.of(context).size.width,
-                      child: Image.asset(MediaQuery.sizeOf(context).width > 700
-                          ? 'assets/images/loading_background_pad.png'
-                          : 'assets/images/loading_background.png')),
+                      width: MediaQuery.of(context).size.width > 700 ? MediaQuery.sizeOf(context).width * 0.85 : MediaQuery.of(context).size.width, child: Image.asset(MediaQuery.sizeOf(context).width > 700 ? 'assets/images/loading_background_pad.png' : 'assets/images/loading_background.png')),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -349,11 +335,7 @@ class ModListScreenState extends State<ModListScreen>
                     const SizedBox(
                       height: 10,
                     ),
-                    Text(AppLocale.popup_loading.getString(context),
-                        style: const TextStyle(
-                            fontFamily: 'Joystix',
-                            color: Colors.white,
-                            fontSize: 20))
+                    Text(AppLocale.popup_loading.getString(context), style: const TextStyle(fontFamily: 'Joystix', color: Colors.white, fontSize: 20))
                   ],
                 ),
               ],
@@ -410,8 +392,7 @@ class ModListScreenState extends State<ModListScreen>
       ),
       builder: (context, child) {
         // WidgetsBinding.instance.addPostFrameCallback((_) => _addBanner(context));
-        WidgetsBinding.instance
-            .addPersistentFrameCallback((_) => _addBanner(context));
+        WidgetsBinding.instance.addPersistentFrameCallback((_) => _addBanner(context));
 
         return Stack(
           children: [child!],
@@ -434,12 +415,7 @@ class ModListScreenState extends State<ModListScreen>
                 return IconButton(
                   icon: ShaderMask(
                     shaderCallback: (rect) {
-                      return (ColorsInfo.IsDark
-                              ? ColorsInfo.ColorToGradient(Colors.white)
-                              : ColorsInfo.ColorToGradient(
-                                  HexColor.fromHex("#353539")))
-                          .createShader(
-                              Rect.fromLTRB(0, 0, rect.width, rect.height));
+                      return (ColorsInfo.IsDark ? ColorsInfo.ColorToGradient(Colors.white) : ColorsInfo.ColorToGradient(HexColor.fromHex("#353539"))).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                     },
                     blendMode: BlendMode.srcATop,
                     child: Image.asset(
@@ -474,8 +450,7 @@ class ModListScreenState extends State<ModListScreen>
               child: Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(
-                        left: 13, right: 13, top: 0, bottom: 10),
+                    padding: const EdgeInsets.only(left: 13, right: 13, top: 0, bottom: 10),
                     child: SizedBox(
                       height: 40,
                       child: TextField(
@@ -490,19 +465,16 @@ class ModListScreenState extends State<ModListScreen>
                               style: BorderStyle.none,
                             ),
                           ),
-                          hintText:
-                              AppLocale.main_top_search.getString(context),
+                          hintText: AppLocale.main_top_search.getString(context),
                           border: InputBorder.none,
                           prefixIcon: Padding(
                             padding: const EdgeInsets.all(5),
                             child: Image.asset('assets/images/search_icon.png'),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 7),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 7),
                           fillColor: ColorsInfo.GetColor(ColorType.Second),
                           filled: true,
-                          hintStyle:
-                              TextStyle(color: HexColor.fromHex("#8D8D8D")),
+                          hintStyle: TextStyle(color: HexColor.fromHex("#8D8D8D")),
                         ),
                         onSubmitted: (value) => {
                           setState(() {
@@ -519,16 +491,14 @@ class ModListScreenState extends State<ModListScreen>
                     padding: const EdgeInsets.only(bottom: 8, left: 5),
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      controller:
-                          _scrollController, // Use the scroll controller here
+                      controller: _scrollController, // Use the scroll controller here
                       itemCount: 7,
                       itemBuilder: (context, index) {
                         return SizedBox(
                           width: crossAxisCount < 3 ? 120 : (screenWidth / 6),
                           height: 45,
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             child: GradientElevatedButton(
                               onPressed: () {
                                 setState(() {
@@ -542,20 +512,8 @@ class ModListScreenState extends State<ModListScreen>
                                 });
                               },
                               gradient: _activeCategoryIndex == index
-                                  ? LinearGradient(
-                                      colors: [
-                                          HexColor.fromHex("#5E53F1"),
-                                          HexColor.fromHex("#5E53F1")
-                                        ],
-                                      begin: FractionalOffset.centerLeft,
-                                      end: FractionalOffset.centerRight)
-                                  : LinearGradient(
-                                      colors: [
-                                          ColorsInfo.GetColor(ColorType.Second),
-                                          ColorsInfo.GetColor(ColorType.Second)
-                                        ],
-                                      begin: FractionalOffset.centerLeft,
-                                      end: FractionalOffset.centerRight),
+                                  ? LinearGradient(colors: [HexColor.fromHex("#5E53F1"), HexColor.fromHex("#5E53F1")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight)
+                                  : LinearGradient(colors: [ColorsInfo.GetColor(ColorType.Second), ColorsInfo.GetColor(ColorType.Second)], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight),
                               child: Row(
                                 children: [
                                   SizedBox(
@@ -567,13 +525,7 @@ class ModListScreenState extends State<ModListScreen>
                                           image: _categoryIcons[index].image,
                                           fit: BoxFit.cover,
                                           colorFilter: ColorFilter.mode(
-                                            (_activeCategoryIndex == index
-                                                    ? Colors.white
-                                                    : (ColorsInfo.IsDark
-                                                        ? Colors.white
-                                                        : HexColor.fromHex(
-                                                            "#8E8E8E")))
-                                                .withOpacity(1),
+                                            (_activeCategoryIndex == index ? Colors.white : (ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#8E8E8E"))).withOpacity(1),
                                             BlendMode.srcATop,
                                           ),
                                         ),
@@ -584,16 +536,10 @@ class ModListScreenState extends State<ModListScreen>
                                     child: FittedBox(
                                       fit: BoxFit.scaleDown,
                                       child: Text(
-                                        AppLocale.categoryIndexToString(
-                                            index, context),
+                                        AppLocale.categoryIndexToString(index, context),
                                         style: TextStyle(
                                           fontSize: 13,
-                                          color: _activeCategoryIndex == index
-                                              ? Colors.white
-                                              : (ColorsInfo.IsDark
-                                                  ? Colors.white
-                                                  : HexColor.fromHex(
-                                                      "#8E8E8E")),
+                                          color: _activeCategoryIndex == index ? Colors.white : (ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#8E8E8E")),
                                           fontFamily: "Joystix_Bold",
                                         ),
                                         overflow: TextOverflow.ellipsis,
@@ -612,8 +558,7 @@ class ModListScreenState extends State<ModListScreen>
               ),
             ),
           ),
-          drawer: SideDrawer.getDrawer(context, screenWidth, screenHeight,
-              version, SelectedCategory.MainMenu),
+          drawer: SideDrawer.getDrawer(context, screenWidth, screenHeight, version, SelectedCategory.MainMenu),
           onDrawerChanged: (isOpened) => {
                 // setState(() {
                 //   hideBanner = isOpened;
@@ -625,8 +570,7 @@ class ModListScreenState extends State<ModListScreen>
               ModListScreen.mainContext = context,
               if (AdManager.hideBanner)
                 {
-                  if (info.visibleFraction == 1)
-                    {AdManager.hideBanner = false, _addBanner(context)}
+                  if (info.visibleFraction == 1) {AdManager.hideBanner = false, _addBanner(context)}
                 }
             },
             child: Container(
@@ -638,8 +582,7 @@ class ModListScreenState extends State<ModListScreen>
                     _activeCategoryIndex = index;
                   });
                 },
-                children: (searchText != "" ? searchedMods : modService!.mods)
-                    .map((modItems) {
+                children: (searchText != "" ? searchedMods : modService!.mods).map((modItems) {
                   return Container(
                     color: ColorsInfo.GetColor(ColorType.Second),
                     child: LayoutBuilder(
@@ -647,18 +590,15 @@ class ModListScreenState extends State<ModListScreen>
                         double modItemHeight = 215; // Current mod height
                         double adItemHeight = modItemHeight;
                         return GridView.builder(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 8),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: crossAxisCount,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
                             mainAxisExtent: modItemHeight,
                             childAspectRatio: 225 / 205,
                           ),
-                          itemCount: NativeAdManager()
-                              .getTotalItemCount(modItems.length),
+                          itemCount: NativeAdManager().getTotalItemCount(modItems.length),
                           itemBuilder: (context, index) {
                             // // Showing ads after every 5 mods (position 6, 12, 18…)
                             // if (NativeAdManager().isAdIndex(index)) {
@@ -668,18 +608,15 @@ class ModListScreenState extends State<ModListScreen>
                             //   });
 
                             if (NativeAdManager().isAdIndex(index)) {
-                              NativeAdManager().maybePreloadAds(
-                                  index, modItems.length); // 👈 Один виклик
+                              NativeAdManager().maybePreloadAds(index, modItems.length); // 👈 Один виклик
 
-                              return NativeAdManager().getAdWidget(index,
-                                  height: adItemHeight, refresh: () {
+                              return NativeAdManager().getAdWidget(index, height: adItemHeight, refresh: () {
                                 setState(() {});
                               });
                             }
 
                             // Real mod index (excluding advertising)
-                            int actualIndex =
-                                NativeAdManager().getRealModIndex(index);
+                            int actualIndex = NativeAdManager().getRealModIndex(index);
 
                             // Protection against going outside the array boundaries
                             if (actualIndex >= modItems.length) {
@@ -689,85 +626,96 @@ class ModListScreenState extends State<ModListScreen>
                             return SizedBox(
                               child: InkWell(
                                 onTap: () async {
-                                  if (AdConfig.isAdsEnabled) {
-                                    // Interstitial advertising
-                                    if (AdManager.nextTimeInterstitial ==
-                                        null) {
-                                      if (await AdManager.manager!
-                                          .isInterstitialReady()) {
-                                        AdManager.interstitialListener =
-                                            InterstitialListener();
-                                        await AdManager.manager!
-                                            .showInterstitial(AdManager
-                                                .interstitialListener!);
-                                        await waitWhile(() => AdManager
-                                            .interstitialListener!.adEnded);
-                                        AdManager.nextTimeInterstitial =
-                                            DateTime.now().add(
-                                                const Duration(seconds: 60));
+                                  // NativeAdWidget
+                                  await AdFlowManager.showInterstitialWithNativePreload(
+                                    context: context,
+                                    showInterstitialFlow: () async {
+                                      if (AdConfig.isAdsEnabled) {
+                                        if (AdManager.nextTimeInterstitial == null || AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
+                                          if (await AdManager.manager!.isInterstitialReady()) {
+                                            AdManager.interstitialListener = InterstitialListener();
+                                            await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+                                            await waitWhile(() => AdManager.interstitialListener!.adEnded);
+                                            AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
+                                          }
+                                        }
                                       }
-                                    } else if (AdManager.nextTimeInterstitial!
-                                        .isBefore(DateTime.now())) {
-                                      if (await AdManager.manager!
-                                          .isInterstitialReady()) {
-                                        AdManager.interstitialListener =
-                                            InterstitialListener();
-                                        await AdManager.manager!
-                                            .showInterstitial(AdManager
-                                                .interstitialListener!);
-                                        await waitWhile(() => AdManager
-                                            .interstitialListener!.adEnded);
-                                        AdManager.nextTimeInterstitial =
-                                            DateTime.now().add(
-                                                const Duration(seconds: 60));
-                                      }
-                                    }
-                                  }
 
-                                  // Go to the mod details screen
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => screenWidth > 700
-                                          ? ModDetailScreenPadWidget(
-                                              modItem: modItems[actualIndex],
-                                              modListScreen: this,
-                                              favoritesListScreen: null,
-                                              modListIndex:
-                                                  _activeCategoryIndex,
-                                            )
-                                          : ModDetailScreenWidget(
-                                              modItem: modItems[actualIndex],
-                                              modListScreen: this,
-                                              favoritesListScreen: null,
-                                              modListIndex:
-                                                  _activeCategoryIndex,
-                                            ),
-                                    ),
+                                      // 🔹 Переходимо після реклами (або одразу)
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => screenWidth > 700
+                                              ? ModDetailScreenPadWidget(
+                                                  modItem: modItems[actualIndex],
+                                                  modListScreen: this,
+                                                  favoritesListScreen: null,
+                                                  modListIndex: _activeCategoryIndex,
+                                                )
+                                              : ModDetailScreenWidget(
+                                                  modItem: modItems[actualIndex],
+                                                  modListScreen: this,
+                                                  favoritesListScreen: null,
+                                                  modListIndex: _activeCategoryIndex,
+                                                ),
+                                        ),
+                                      );
+                                    },
                                   );
                                 },
+
+                                // onTap: () async {
+                                //   if (AdConfig.isAdsEnabled) {
+                                //     // Interstitial advertising
+                                //     if (AdManager.nextTimeInterstitial == null) {
+                                //       if (await AdManager.manager!.isInterstitialReady()) {
+                                //         AdManager.interstitialListener = InterstitialListener();
+                                //         await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+                                //         await waitWhile(() => AdManager.interstitialListener!.adEnded);
+                                //         AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
+                                //       }
+                                //     } else if (AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
+                                //       if (await AdManager.manager!.isInterstitialReady()) {
+                                //         AdManager.interstitialListener = InterstitialListener();
+                                //         await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+                                //         await waitWhile(() => AdManager.interstitialListener!.adEnded);
+                                //         AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
+                                //       }
+                                //     }
+                                //   }
+
+                                //   // Go to the mod details screen
+                                //   Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (context) => screenWidth > 700
+                                //           ? ModDetailScreenPadWidget(
+                                //               modItem: modItems[actualIndex],
+                                //               modListScreen: this,
+                                //               favoritesListScreen: null,
+                                //               modListIndex: _activeCategoryIndex,
+                                //             )
+                                //           : ModDetailScreenWidget(
+                                //               modItem: modItems[actualIndex],
+                                //               modListScreen: this,
+                                //               favoritesListScreen: null,
+                                //               modListIndex: _activeCategoryIndex,
+                                //             ),
+                                //     ),
+                                //   );
+                                // },
                                 child: VisibilityDetector(
-                                  key: Key(modItems[actualIndex].imageUrl +
-                                      modItems[actualIndex]
-                                          .isFirestoreChecked
-                                          .toString()),
+                                  key: Key(modItems[actualIndex].imageUrl + modItems[actualIndex].isFirestoreChecked.toString()),
                                   onVisibilityChanged: (visibility) async {
-                                    if (visibility.visibleFraction > 0 &&
-                                        !modItems[actualIndex]
-                                            .isFirestoreChecked) {
-                                      // 🔸 Тут може бути твоя логіка для Firestore
+                                    if (visibility.visibleFraction > 0 && !modItems[actualIndex].isFirestoreChecked) {
                                     } else if (visibility.visibleFraction > 0) {
-                                      bool cached =
-                                          await CacheManager.isCacheAvailable(
-                                              modItems[actualIndex]
-                                                  .downloadURL);
+                                      bool cached = await CacheManager.isCacheAvailable(modItems[actualIndex].downloadURL);
                                       setState(() {
                                         modItems[actualIndex].cached = cached;
                                       });
                                     }
                                   },
-                                  child: ModItem(
-                                      modItemData: modItems[actualIndex]),
+                                  child: ModItem(modItemData: modItems[actualIndex]),
                                 ),
                               ),
                             );
