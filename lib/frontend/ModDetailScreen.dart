@@ -583,7 +583,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 Container(
                   color: ColorsInfo.GetColor(ColorType.Second),
                   child: MiniModList(
-                    count: 6,
+                    count: 4,
                     mode: DisplayMode.grid,
                     sourceMods: modService!.mods[modList],
                     modListIndex: modList,
@@ -640,46 +640,46 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     );
   }
 
-  final Map<String, bool> _modCacheStatus = {};
-  Widget getMiniMod(ModItemData modItem, ModListScreenState? modListState, FavoritesModListScreenState? favListState, BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width / 2.2,
-      height: 197,
-      child: InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MediaQuery.of(context).size.width > 700
-                    ? ModDetailScreenPadWidget(
-                        modItem: modItem,
-                        modListScreen: modListState,
-                        favoritesListScreen: favListState,
-                        modListIndex: modList,
-                      )
-                    : ModDetailScreenWidget(
-                        modItem: modItem,
-                        modListScreen: modListState,
-                        favoritesListScreen: favListState,
-                        modListIndex: modList,
-                      ),
-              ),
-            );
-          },
-          child: VisibilityDetector(
-            key: Key(modItem.imageUrl + modItem.isFirestoreChecked.toString()),
-            onVisibilityChanged: (visibility) async {
-              final key = modItem.downloadURL;
-              await LogService.log('Visibility triggered for mod: ${modItem.title}');
-              if (visibility.visibleFraction > 0 && !_modCacheStatus.containsKey(key)) {
-                bool cached = await CacheManager.isCacheAvailable(key);
-                _modCacheStatus[key] = cached;
+  // final Map<String, bool> _modCacheStatus = {};
+  // Widget getMiniMod(ModItemData modItem, ModListScreenState? modListState, FavoritesModListScreenState? favListState, BuildContext context) {
+  //   return SizedBox(
+  //     width: MediaQuery.of(context).size.width / 2.2,
+  //     height: 197,
+  //     child: InkWell(
+  //         onTap: () {
+  //           Navigator.push(
+  //             context,
+  //             MaterialPageRoute(
+  //               builder: (context) => MediaQuery.of(context).size.width > 700
+  //                   ? ModDetailScreenPadWidget(
+  //                       modItem: modItem,
+  //                       modListScreen: modListState,
+  //                       favoritesListScreen: favListState,
+  //                       modListIndex: modList,
+  //                     )
+  //                   : ModDetailScreenWidget(
+  //                       modItem: modItem,
+  //                       modListScreen: modListState,
+  //                       favoritesListScreen: favListState,
+  //                       modListIndex: modList,
+  //                     ),
+  //             ),
+  //           );
+  //         },
+  //         child: VisibilityDetector(
+  //           key: Key(modItem.imageUrl + modItem.isFirestoreChecked.toString()),
+  //           onVisibilityChanged: (visibility) async {
+  //             final key = modItem.downloadURL;
+  //             await LogService.log('Visibility triggered for mod: ${modItem.title}');
+  //             if (visibility.visibleFraction > 0 && !_modCacheStatus.containsKey(key)) {
+  //               bool cached = await CacheManager.isCacheAvailable(key);
+  //               _modCacheStatus[key] = cached;
 
-                if (mounted) setState(() {});
-              }
-            },
-            child: ModItemMini(modItemData: modItem),
-          )),
-    );
-  }
+  //               if (mounted) setState(() {});
+  //             }
+  //           },
+  //           child: ModItemMini(modItemData: modItem),
+  //         )),
+  //   );
+  // }
 }

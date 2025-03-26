@@ -54,16 +54,20 @@ class _MiniModListState extends State<MiniModList> {
     if (_mods.isEmpty) return const SizedBox.shrink();
 
     return switch (widget.mode) {
-      DisplayMode.grid => Column(
-          children: [
-            for (int i = 0; i < _mods.length; i += 2)
-              Row(
-                children: [
-                  Expanded(child: _buildMiniMod(_mods[i])),
-                  if (i + 1 < _mods.length) Expanded(child: _buildMiniMod(_mods[i + 1])),
-                ],
-              ),
-          ],
+      DisplayMode.grid => GridView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _mods.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 349 / 243, // 👈 або 1.44
+          ),
+          itemBuilder: (context, index) {
+            return _buildMiniMod(_mods[index], 349 / 243);
+          },
         ),
       DisplayMode.scroll => SizedBox(
           height: 197,
@@ -72,53 +76,107 @@ class _MiniModListState extends State<MiniModList> {
             itemCount: _mods.length,
             itemBuilder: (context, i) => Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: _buildMiniMod(_mods[i]),
+              child: _buildMiniMod(_mods[i], 1.0),
             ),
           ),
         ),
     };
   }
 
-  Widget _buildMiniMod(ModItemData modItem) {
+  Widget _buildMiniMod(ModItemData modItem, double aspectRatio) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final itemWidth = (screenWidth - 24) / 2; // 🔹 12+12 padding або spacing
+
     return SizedBox(
-      width: MediaQuery.of(context).size.width / 2.2,
-      height: 197,
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MediaQuery.of(context).size.width > 700
-                  ? ModDetailScreenPadWidget(
-                      modItem: modItem,
-                      modListScreen: widget.modListScreen,
-                      favoritesListScreen: widget.favoriteListScreen,
-                      modListIndex: widget.modListIndex,
-                    )
-                  : ModDetailScreenWidget(
-                      modItem: modItem,
-                      modListScreen: widget.modListScreen,
-                      favoritesListScreen: widget.favoriteListScreen,
-                      modListIndex: widget.modListIndex,
-                    ),
-            ),
-          );
-        },
-        child: VisibilityDetector(
-          key: Key(modItem.imageUrl + modItem.isFirestoreChecked.toString()),
-          onVisibilityChanged: (visibility) async {
-            if (visibility.visibleFraction > 0) {
-              bool cached = await CacheManager.isCacheAvailable(modItem.downloadURL);
-              if (mounted && modItem.cached != cached) {
-                setState(() {
-                  modItem.cached = cached;
-                });
-              }
-            }
+      width: itemWidth,
+      child: AspectRatio(
+        aspectRatio: aspectRatio,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MediaQuery.of(context).size.width > 700
+                    ? ModDetailScreenPadWidget(
+                        modItem: modItem,
+                        modListScreen: widget.modListScreen,
+                        favoritesListScreen: widget.favoriteListScreen,
+                        modListIndex: widget.modListIndex,
+                      )
+                    : ModDetailScreenWidget(
+                        modItem: modItem,
+                        modListScreen: widget.modListScreen,
+                        favoritesListScreen: widget.favoriteListScreen,
+                        modListIndex: widget.modListIndex,
+                      ),
+              ),
+            );
           },
-          child: ModItemMini(modItemData: modItem),
+          child: VisibilityDetector(
+            key: Key(modItem.imageUrl + modItem.isFirestoreChecked.toString()),
+            onVisibilityChanged: (visibility) async {
+              if (visibility.visibleFraction > 0) {
+                bool cached = await CacheManager.isCacheAvailable(modItem.downloadURL);
+                if (mounted && modItem.cached != cached) {
+                  setState(() {
+                    modItem.cached = cached;
+                  });
+                }
+              }
+            },
+            child: ModItemMini(
+              modItemData: modItem,
+              compact: widget.mode == DisplayMode.grid,
+            ),
+          ),
         ),
       ),
     );
   }
+
+  // Widget _buildMiniMod(ModItemData modItem) {
+  //   return SizedBox(
+  //     width: MediaQuery.of(context).size.width / 2.2,
+  //     height: 197,
+  //     child: InkWell(
+  //       onTap: () {
+  //         Navigator.push(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (_) => MediaQuery.of(context).size.width > 700
+  //                 ? ModDetailScreenPadWidget(
+  //                     modItem: modItem,
+  //                     modListScreen: widget.modListScreen,
+  //                     favoritesListScreen: widget.favoriteListScreen,
+  //                     modListIndex: widget.modListIndex,
+  //                   )
+  //                 : ModDetailScreenWidget(
+  //                     modItem: modItem,
+  //                     modListScreen: widget.modListScreen,
+  //                     favoritesListScreen: widget.favoriteListScreen,
+  //                     modListIndex: widget.modListIndex,
+  //                   ),
+  //           ),
+  //         );
+  //       },
+  //       child: VisibilityDetector(
+  //         key: Key(modItem.imageUrl + modItem.isFirestoreChecked.toString()),
+  //         onVisibilityChanged: (visibility) async {
+  //           if (visibility.visibleFraction > 0) {
+  //             bool cached = await CacheManager.isCacheAvailable(modItem.downloadURL);
+  //             if (mounted && modItem.cached != cached) {
+  //               setState(() {
+  //                 modItem.cached = cached;
+  //               });
+  //             }
+  //           }
+  //         },
+  //         child: ModItemMini(
+  //           modItemData: modItem,
+  //           compact: widget.mode == DisplayMode.grid,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }
