@@ -33,7 +33,7 @@ class _ModScreenshotGalleryState extends State<ModScreenshotGallery> {
             itemCount: widget.screenshots.length,
             itemBuilder: (context, index) {
               return ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                // borderRadius: BorderRadius.circular(12),
                 child: Image.network(
                   widget.screenshots[index],
                   headers: {
