@@ -31,6 +31,8 @@ import 'LoadingDialog.dart';
 import 'package:path/path.dart' as p;
 import '../backend/native_ads/SingleNativeAdLoader.dart';
 import '../frontend/widgets/ModScreenshotGallery.dart';
+import '../backend/LogService.dart';
+import '../frontend/widgets/MiniModList.dart';
 
 bool hideDescription = false;
 
@@ -66,6 +68,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   List<String>? rewardedWatched;
   // NativeAdWidget
   Widget? _nativeAdWidget;
+  late List<ModItemData> recommendedMods;
 
   ModDetailScreen({required this.modItem, required this.modListScreen, required this.favoriteListScreen, required this.modList});
 
@@ -75,6 +78,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateCacheInfo();
       // NativeAdWidget
+      LogService.log('ModDetailScreen initState triggered');
       _initNativeAd();
     });
 
@@ -96,16 +100,20 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   _updateCacheInfo() async {
     bool isCached = await CacheManager.isCacheAvailable(modItem.downloadURL);
 
-    setState(() {
-      cached = isCached;
-    });
+    if (cached != isCached) {
+      if (mounted) {
+        setState(() {
+          cached = isCached;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-
+    LogService.log('ModDetailScreen build triggered');
     final random = Random();
 
     return Scaffold(
@@ -179,6 +187,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             child: ListView(
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                //Galery of mods images
                 Container(
                   // constraints: const BoxConstraints(maxWidth: 349, maxHeight: 243),
                   child: ModScreenshotGallery(screenshots: modItem.screenshots),
@@ -572,37 +581,48 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 ),
 
                 Container(
-                    color: ColorsInfo.GetColor(ColorType.Second),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            children: [
-                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 5,
-                          ),
-                          Row(
-                            children: [
-                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                              getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ))
+                  color: ColorsInfo.GetColor(ColorType.Second),
+                  child: MiniModList(
+                    count: 6,
+                    mode: DisplayMode.grid,
+                    sourceMods: modService!.mods[modList],
+                    modListIndex: modList,
+                    modListScreen: modListScreen,
+                    favoriteListScreen: favoriteListScreen,
+                  ),
+                ),
+
+                // Container(
+                //   color: ColorsInfo.GetColor(ColorType.Second),
+                //   child: Column(
+                //     children: [
+                //       Row(
+                //         children: [
+                //           getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                //           getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                //         ],
+                //       ),
+                //       const SizedBox(
+                //         height: 5,
+                //       ),
+                //       Row(
+                //         children: [
+                //           getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                //           getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                //         ],
+                //       ),
+                //       const SizedBox(
+                //         height: 5,
+                //       ),
+                //       Row(
+                //         children: [
+                //           getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                //           getMiniMod(modService!.mods[modList][random.nextInt(modService!.mods[modList].length)], modListScreen, favoriteListScreen, context),
+                //         ],
+                //       ),
+                //     ],
+                //   ),
+                // )
               ],
             ),
           ),
@@ -610,6 +630,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   }
 
   void _showLoadingDialog(BuildContext context) {
+    LogService.log('void _showLoadingDialog(BuildContext context) triggered');
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -619,6 +640,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     );
   }
 
+  final Map<String, bool> _modCacheStatus = {};
   Widget getMiniMod(ModItemData modItem, ModListScreenState? modListState, FavoritesModListScreenState? favListState, BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width / 2.2,
@@ -646,7 +668,16 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           },
           child: VisibilityDetector(
             key: Key(modItem.imageUrl + modItem.isFirestoreChecked.toString()),
-            onVisibilityChanged: (visibility) async {},
+            onVisibilityChanged: (visibility) async {
+              final key = modItem.downloadURL;
+              await LogService.log('Visibility triggered for mod: ${modItem.title}');
+              if (visibility.visibleFraction > 0 && !_modCacheStatus.containsKey(key)) {
+                bool cached = await CacheManager.isCacheAvailable(key);
+                _modCacheStatus[key] = cached;
+
+                if (mounted) setState(() {});
+              }
+            },
             child: ModItemMini(modItemData: modItem),
           )),
     );
