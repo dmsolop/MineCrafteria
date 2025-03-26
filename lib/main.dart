@@ -29,6 +29,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'backend/native_ads/NativeAdManager.dart';
 import 'backend/native_ads/AdFlowManager.dart';
+import 'backend/LogService.dart';
 
 //test gap
 final FlutterLocalization localization = FlutterLocalization.instance;
@@ -111,7 +112,7 @@ Future<void> fetchRemoteConfig() async {
     bool enableAds = remoteConfig.getBool("enable_ads");
     debugPrint("✅ Firebase Remote Config received. enable_ads: $enableAds");
 
-    AdConfig.isAdsEnabled = enableAds;
+    AdConfig.isAdsEnabled = false; //enableAds;
     if (AdConfig.isAdsEnabled) {
       AdManager.initialize();
       MobileAds.instance.initialize();
@@ -223,6 +224,7 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
   int _activeCategoryIndex = 0;
   final PageController _pageController = PageController();
   final TextEditingController _searchController = TextEditingController();
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -251,8 +253,28 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
       }
     });
 
+    _checkInitAndLoadMods();
+
     // Repeat the animation indefinitely
     _controller.repeat();
+  }
+
+  void _checkInitAndLoadMods() {
+    if ((modService != null ? modService!.mods.isEmpty : true) && !isPremShown) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        try {
+          await init();
+
+          if (mounted) {
+            setState(() {
+              _isInitialized = true;
+            });
+          }
+        } catch (e) {
+          LogService.log('INIT ERROR: $e');
+        }
+      });
+    }
   }
 
   void _scrollToActiveCategory() {
@@ -297,86 +319,135 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     int crossAxisCount = screenWidth > 700 ? 3 : (screenWidth < 500 ? 1 : 2);
+    LogService.log('ModListScreen build triggered');
 
-    if ((modService != null ? modService!.mods.isEmpty : true) && !isPremShown) {
+    if ((modService != null ? modService!.mods.isEmpty : true) && !isPremShown && !_isInitialized) {
       return Scaffold(
-          backgroundColor: HexColor.fromHex("#25292e"),
-          body: VisibilityDetector(
-            key: const Key('loading-widget'),
-            child: Stack(
+        backgroundColor: HexColor.fromHex("#25292e"),
+        body: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
               alignment: Alignment.center,
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                      width: MediaQuery.of(context).size.width > 700 ? MediaQuery.sizeOf(context).width * 0.85 : MediaQuery.of(context).size.width, child: Image.asset(MediaQuery.sizeOf(context).width > 700 ? 'assets/images/loading_background_pad.png' : 'assets/images/loading_background.png')),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width > 700 ? MediaQuery.sizeOf(context).width * 0.85 : MediaQuery.of(context).size.width,
+                child: Image.asset(
+                  MediaQuery.sizeOf(context).width > 700 ? 'assets/images/loading_background_pad.png' : 'assets/images/loading_background.png',
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(
-                      height: 600,
-                    ),
-                    AnimatedBuilder(
-                      animation: _animation,
-                      builder: (context, child) {
-                        // Use Transform.rotate to rotate the
-                        // Image based on the animation value
-                        return Transform.rotate(
-                          angle: _animation.value,
-                          child: Image.asset(
-                            'assets/images/icon_pix_loading.png', // Replace with your image asset
-                            width: 70,
-                            height: 70,
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(AppLocale.popup_loading.getString(context), style: const TextStyle(fontFamily: 'Joystix', color: Colors.white, fontSize: 20))
-                  ],
+              ),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 600),
+                AnimatedBuilder(
+                  animation: _animation,
+                  builder: (context, child) {
+                    return Transform.rotate(
+                      angle: _animation.value,
+                      child: Image.asset(
+                        'assets/images/icon_pix_loading.png',
+                        width: 70,
+                        height: 70,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  AppLocale.popup_loading.getString(context),
+                  style: const TextStyle(
+                    fontFamily: 'Joystix',
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
                 ),
               ],
             ),
-            onVisibilityChanged: (visibilityInfo) async {
-              if (visibilityInfo.visibleFraction == 1) {
-                try {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => PremiumScreen4(),
-                  //   ),
-                  // );
-
-                  await init();
-
-                  RestartWidget.restartApp(context, false, false, false);
-
-                  // if(isPremShown) {
-                  //   RestartWidget.restartApp(context, false, false, false);
-                  // }
-                  // else {
-                  //   if(!(await SubscriptionManager.isSubscriptionActive(context)) && SubscriptionManager.weekItem != null) {
-                  //     isPremShown = true;
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (context) => Platform.isIOS ? PremiumScreen1() : PremiumScreen4(),
-                  //       ),
-                  //     );
-                  //   }
-                  //   else {
-                  //     if(SubscriptionManager.weekItem == null) SubscriptionManager.premium_week_price = AppLocale.premium_view4_button_buy.getString(context);
-                  //     RestartWidget.restartApp(context, false, false, false);
-                  //   }
-                  // }
-                } catch (e) {}
-              }
-            },
-          ));
+          ],
+        ),
+      );
     }
+
+    // if ((modService != null ? modService!.mods.isEmpty : true) && !isPremShown) {
+    //   return Scaffold(
+    //       backgroundColor: HexColor.fromHex("#25292e"),
+    //       body: VisibilityDetector(
+    //         key: const Key('loading-widget'),
+    //         child: Stack(
+    //           alignment: Alignment.center,
+    //           children: [
+    //             Align(
+    //               alignment: Alignment.center,
+    //               child: SizedBox(
+    //                   width: MediaQuery.of(context).size.width > 700 ? MediaQuery.sizeOf(context).width * 0.85 : MediaQuery.of(context).size.width, child: Image.asset(MediaQuery.sizeOf(context).width > 700 ? 'assets/images/loading_background_pad.png' : 'assets/images/loading_background.png')),
+    //             ),
+    //             Column(
+    //               mainAxisAlignment: MainAxisAlignment.center,
+    //               children: [
+    //                 const SizedBox(
+    //                   height: 600,
+    //                 ),
+    //                 AnimatedBuilder(
+    //                   animation: _animation,
+    //                   builder: (context, child) {
+    //                     // Use Transform.rotate to rotate the
+    //                     // Image based on the animation value
+    //                     return Transform.rotate(
+    //                       angle: _animation.value,
+    //                       child: Image.asset(
+    //                         'assets/images/icon_pix_loading.png', // Replace with your image asset
+    //                         width: 70,
+    //                         height: 70,
+    //                       ),
+    //                     );
+    //                   },
+    //                 ),
+    //                 const SizedBox(
+    //                   height: 10,
+    //                 ),
+    //                 Text(AppLocale.popup_loading.getString(context), style: const TextStyle(fontFamily: 'Joystix', color: Colors.white, fontSize: 20))
+    //               ],
+    //             ),
+    //           ],
+    //         ),
+    //         onVisibilityChanged: (visibilityInfo) async {
+    //           if (visibilityInfo.visibleFraction == 1) {
+    //             try {
+    //               // Navigator.push(
+    //               //   context,
+    //               //   MaterialPageRoute(
+    //               //     builder: (context) => PremiumScreen4(),
+    //               //   ),
+    //               // );
+
+    //               await init();
+    //               LogService.log('RESTART TRIGGERED BY VISIBILITY');
+    //               RestartWidget.restartApp(context, false, false, false);
+
+    //               // if(isPremShown) {
+    //               //   RestartWidget.restartApp(context, false, false, false);
+    //               // }
+    //               // else {
+    //               //   if(!(await SubscriptionManager.isSubscriptionActive(context)) && SubscriptionManager.weekItem != null) {
+    //               //     isPremShown = true;
+    //               //     Navigator.push(
+    //               //       context,
+    //               //       MaterialPageRoute(
+    //               //         builder: (context) => Platform.isIOS ? PremiumScreen1() : PremiumScreen4(),
+    //               //       ),
+    //               //     );
+    //               //   }
+    //               //   else {
+    //               //     if(SubscriptionManager.weekItem == null) SubscriptionManager.premium_week_price = AppLocale.premium_view4_button_buy.getString(context);
+    //               //     RestartWidget.restartApp(context, false, false, false);
+    //               //   }
+    //               // }
+    //             } catch (e) {}
+    //           }
+    //         },
+    //       ));
+    // }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() {});
     });
