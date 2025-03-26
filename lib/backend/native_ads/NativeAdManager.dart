@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../AccessKeys.dart';
 import '../AdManager.dart';
+import '../../backend/LogService.dart';
 
 class NativeAdManager {
   // Singleton інстанс
@@ -35,14 +36,11 @@ class NativeAdManager {
 
   // 🔹 Скільки всього елементів (моди + реклама)
   int getTotalItemCount(int modCount) {
-    return AdConfig.isAdsEnabled
-        ? modCount + (modCount / _adFrequency).floor()
-        : modCount;
+    return AdConfig.isAdsEnabled ? modCount + (modCount / _adFrequency).floor() : modCount;
   }
 
   // 🔹 Отримати рекламний віджет (кеш або загрузка)
-  Widget getAdWidget(int index,
-      {double? height, required VoidCallback refresh}) {
+  Widget getAdWidget(int index, {double? height, required VoidCallback refresh}) {
     if (!AdConfig.isAdsEnabled) {
       return const SizedBox.shrink(); // 🔹 Реклама вимкнена
     }
@@ -54,6 +52,7 @@ class NativeAdManager {
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             _adLoadedFlags[index] = true;
+            LogService.log('NativeAdListener refresh()');
             refresh();
           },
           onAdFailedToLoad: (ad, error) {
@@ -74,8 +73,7 @@ class NativeAdManager {
 
   // 🔹 Pre-load реклами для вказаних індексів
   void preLoadAd({List<int> indexes = const [5, 11, 17]}) {
-    if (!AdConfig.isAdsEnabled)
-      return; // 🔹 Не вантажити, якщо реклама вимкнена
+    if (!AdConfig.isAdsEnabled) return; // 🔹 Не вантажити, якщо реклама вимкнена
 
     for (int index in indexes) {
       if (_nativeAds[index] == null) {
@@ -85,6 +83,7 @@ class NativeAdManager {
           listener: NativeAdListener(
             onAdLoaded: (ad) {
               _adLoadedFlags[index] = true;
+              LogService.log('Preloading ad for indexes: $indexes');
             },
             onAdFailedToLoad: (ad, error) {
               ad.dispose();
@@ -106,6 +105,7 @@ class NativeAdManager {
       for (int i = 1; i <= 3; i++) {
         int nextAdIndex = _lastPreloadedAdIndex + i * 6;
         int maxAllowedAdIndex = getTotalItemCount(totalMods) - 1;
+        LogService.log('maybePreloadAds called at index: $currentIndex');
 
         if (nextAdIndex <= maxAllowedAdIndex) {
           newIndexes.add(nextAdIndex);
