@@ -17,7 +17,7 @@ class SingleNativeAdLoader {
     // 🔹 Отримуємо AdWidget (з кешу або створюється)
     Widget adWidget = _adManager.getAdWidget(0, height: height, refresh: () {
       if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop(); // ховаємо прелоадер
+        // Navigator.of(context, rootNavigator: true).pop(); // ховаємо прелоадер
       }
     });
 
@@ -27,21 +27,24 @@ class SingleNativeAdLoader {
     }
 
     // 🔹 Якщо ні — показати прелоадер
-    if (!context.mounted) return null;
+    // if (!context.mounted) return null;
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (_) => const LoadingDialog(),
+    // );
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const LoadingDialog(),
-    );
+    // // Дати трохи часу на завантаження та побудову
+    // await Future.delayed(const Duration(milliseconds: 500));
 
-    // Дати трохи часу на завантаження та побудову
-    await Future.delayed(const Duration(milliseconds: 500));
+    // if (context.mounted) {
+    //   Navigator.of(context, rootNavigator: true).pop();
+    // }
 
-    if (context.mounted) {
-      Navigator.of(context, rootNavigator: true).pop();
-    }
+    // return SizedBox(height: height, width: double.infinity, child: adWidget);
+  }
 
-    return SizedBox(height: height, width: double.infinity, child: adWidget);
+  void disposeAllAds() {
+    _adManager.disposeAllAds();
   }
 }
