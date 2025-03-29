@@ -136,7 +136,17 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
         appBar: AppBar(
           leading: IconButton(
             icon: ColorsInfo.GetBackButton(),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (_phase == ModDetailPhase.description) {
+                Navigator.of(context).pop(); // назад до списку модів
+              } else {
+                setState(() {
+                  SingleNativeAdLoader().disposeAllAds(); // або NativeAdManager
+                  _phase = ModDetailPhase.values[_phase.index - 1]; // попередня фаза
+                });
+              }
+            },
+            // onPressed: () => Navigator.of(context).pop(),
           ),
           centerTitle: true,
           backgroundColor: ColorsInfo.GetColor(ColorType.Main),
