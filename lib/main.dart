@@ -28,7 +28,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'backend/native_ads/NativeAdManager.dart';
-import 'backend/native_ads/AdFlowManager.dart';
 import 'backend/LogService.dart';
 
 //test gap
@@ -37,7 +36,7 @@ ModService? modService;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  LogService.clearLog();
   await Firebase.initializeApp(); // Firebase initialization
   NativeAdManager().preLoadAd();
 
@@ -161,9 +160,6 @@ Future<void> init() async {
 
   modService = ModService();
   modService!.mods = await modService!.fetchModItems();
-
-  // PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  // version = packageInfo.version;
 
   // ColorsInfo.IsDark
   initialized = true;
@@ -319,7 +315,6 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     int crossAxisCount = screenWidth > 700 ? 3 : (screenWidth < 500 ? 1 : 2);
-    LogService.log('ModListScreen build triggered');
 
     if ((modService != null ? modService!.mods.isEmpty : true) && !isPremShown && !_isInitialized) {
       return Scaffold(
@@ -462,19 +457,11 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
         scaffoldBackgroundColor: ColorsInfo.GetColor(ColorType.Main),
       ),
       builder: (context, child) {
-        // WidgetsBinding.instance.addPostFrameCallback((_) => _addBanner(context));
         WidgetsBinding.instance.addPersistentFrameCallback((_) => _addBanner(context));
 
         return Stack(
           children: [child!],
         );
-
-        // return Stack(
-        //   children: [
-        //     child!,
-        //     Align(alignment: Alignment.bottomCenter, child: AdManager.getBottomBanner(),)
-        //   ],
-        // );
       },
       home: Scaffold(
           backgroundColor: ColorsInfo.GetColor(ColorType.Main),
@@ -693,45 +680,39 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                             if (actualIndex >= modItems.length) {
                               return const SizedBox.shrink();
                             }
-
                             return SizedBox(
                               child: InkWell(
                                 onTap: () async {
-                                  // NativeAdWidget
-                                  await AdFlowManager.showInterstitialWithNativePreload(
-                                    context: context,
-                                    showInterstitialFlow: () async {
-                                      if (AdConfig.isAdsEnabled) {
-                                        if (AdManager.nextTimeInterstitial == null || AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
-                                          if (await AdManager.manager!.isInterstitialReady()) {
-                                            AdManager.interstitialListener = InterstitialListener();
-                                            await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
-                                            await waitWhile(() => AdManager.interstitialListener!.adEnded);
-                                            AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
-                                          }
-                                        }
+                                  // 🔹 Показ interstitial (без preLoadAd!)
+                                  if (AdConfig.isAdsEnabled) {
+                                    if (AdManager.nextTimeInterstitial == null || AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
+                                      if (await AdManager.manager!.isInterstitialReady()) {
+                                        AdManager.interstitialListener = InterstitialListener();
+                                        await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+                                        await waitWhile(() => AdManager.interstitialListener!.adEnded);
+                                        AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
                                       }
+                                    }
+                                  }
 
-                                      // 🔹 Переходимо після реклами (або одразу)
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => screenWidth > 700
-                                              ? ModDetailScreenPadWidget(
-                                                  modItem: modItems[actualIndex],
-                                                  modListScreen: this,
-                                                  favoritesListScreen: null,
-                                                  modListIndex: _activeCategoryIndex,
-                                                )
-                                              : ModDetailScreenWidget(
-                                                  modItem: modItems[actualIndex],
-                                                  modListScreen: this,
-                                                  favoritesListScreen: null,
-                                                  modListIndex: _activeCategoryIndex,
-                                                ),
-                                        ),
-                                      );
-                                    },
+                                  // 🔹 Переходимо після реклами (або одразу)
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => screenWidth > 700
+                                          ? ModDetailScreenPadWidget(
+                                              modItem: modItems[actualIndex],
+                                              modListScreen: this,
+                                              favoritesListScreen: null,
+                                              modListIndex: _activeCategoryIndex,
+                                            )
+                                          : ModDetailScreenWidget(
+                                              modItem: modItems[actualIndex],
+                                              modListScreen: this,
+                                              favoritesListScreen: null,
+                                              modListIndex: _activeCategoryIndex,
+                                            ),
+                                    ),
                                   );
                                 },
 
