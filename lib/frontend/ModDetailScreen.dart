@@ -1,32 +1,20 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:morph_mods/backend/AccessKeys.dart';
 import 'package:morph_mods/backend/AdManager.dart';
 import 'package:morph_mods/backend/CacheManager.dart';
 import 'package:morph_mods/backend/FileManager.dart';
 import 'package:morph_mods/backend/FileOpener.dart';
 import 'package:morph_mods/extensions/text_extension.dart';
 import 'package:morph_mods/frontend/FavoritesScreen.dart';
-import 'package:morph_mods/frontend/InstructionScreen.dart';
-import 'package:morph_mods/frontend/ModDetailScreenPad.dart';
-import 'package:morph_mods/frontend/ModItem.dart';
-import 'package:morph_mods/frontend/ModItemMini.dart';
+
 import 'package:morph_mods/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 import 'ColorsInfo.dart';
 import 'ModItemData.dart';
 import 'package:morph_mods/extensions/color_extension.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'AppLocale.dart';
-import 'package:morph_mods/backend/OpenURL.dart';
-import 'package:morph_mods/backend/ModsManager.dart';
-import 'package:share_plus/share_plus.dart';
 import 'LoadingDialog.dart';
 import 'package:path/path.dart' as p;
 import '../backend/native_ads/SingleNativeAdLoader.dart';
@@ -84,13 +72,25 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   @override
   void initState() {
     super.initState();
+    LogService.log('[ModDetailScreen] initState() — _phase=$_phase');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateCacheInfo();
+      LogService.log('[ModDetailScreen] PostFrame — updating cache info');
+    });
+
+    SingleNativeAdLoader().preloadAd().then((_) {
+      if (mounted) setState(() {});
     });
 
     modItem.title = TextExtension.convertUTF8(modItem.title);
     modItem.author = TextExtension.convertUTF8(modItem.author);
     modItem.description = TextExtension.convertUTF8(modItem.description);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    SingleNativeAdLoader().disposeAllAds();
   }
 
   _updateCacheInfo() async {
@@ -127,7 +127,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
-    LogService.log('ModDetailScreen build triggered');
     final random = Random();
 
     return Scaffold(
@@ -216,51 +215,83 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   Widget _buildBodyByPhase() {
     switch (_phase) {
       case ModDetailPhase.description:
+        LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=description');
         return ListView(
-          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildModHeaderSection(),
             const SizedBox(height: 20),
             _buildModDescription(),
             const SizedBox(height: 20),
-            const NativeAdSlot(height: 260, keyId: 'description'),
+            // const NativeAdSlot(height: 260, index: 0),
+            NativeAdSlot(
+                height: 260,
+                keyId: 'description',
+                onLoaded: () {
+                  setState(() {
+                    print('Ad loaded for description phase!');
+                  });
+                }),
             const SizedBox(height: 20),
             _buildInstallButton(),
           ],
         );
       case ModDetailPhase.instruction:
+        LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=instruction');
         return ListView(
-          // mainAxisAlignment: MainAxisAlignment.start,
           children: [
             _buildInstruction(),
             const SizedBox(height: 20),
-            const NativeAdSlot(height: 260, keyId: 'instruction'),
+            // const NativeAdSlot(height: 260, index: 1),
+            NativeAdSlot(
+                height: 260,
+                keyId: 'instruction',
+                onLoaded: () {
+                  setState(() {
+                    print('Ad loaded for instruction phase!');
+                  });
+                }),
             const SizedBox(height: 20),
             _buildInstallButton(),
           ],
         );
       case ModDetailPhase.pageDownload:
+        LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=pageDownload');
         return ListView(
-          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildModHeaderSection(),
             const SizedBox(height: 20),
             _buildMinimodGrid(),
             const SizedBox(height: 20),
-            const NativeAdSlot(height: 260, keyId: 'pageDownload'),
+            // const NativeAdSlot(height: 260, index: 2),
+            NativeAdSlot(
+                height: 260,
+                keyId: 'pageDownload',
+                onLoaded: () {
+                  setState(() {
+                    print('Ad loaded for pageDownload phase!');
+                  });
+                }),
             const SizedBox(height: 20),
             _buildInstallButton(),
           ],
         );
       case ModDetailPhase.pageLoaded:
+        LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=pageLoaded');
         return ListView(
-          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildModHeaderSection(),
             const SizedBox(height: 20),
             _buildMinimodGrid(),
             const SizedBox(height: 20),
-            const NativeAdSlot(height: 260, keyId: 'pageLoaded'),
+            // const NativeAdSlot(height: 260, index: 3),
+            NativeAdSlot(
+                height: 260,
+                keyId: 'pageLoaded',
+                onLoaded: () {
+                  setState(() {
+                    print('Ad loaded for pageLoaded phase!');
+                  });
+                }),
             const SizedBox(height: 20),
             _buildInstallButton(),
           ],
@@ -872,7 +903,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   }
 
   void _showLoadingDialog(BuildContext context) {
-    LogService.log('void _showLoadingDialog(BuildContext context) triggered');
     showDialog(
       context: context,
       barrierDismissible: false,
