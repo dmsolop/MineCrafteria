@@ -450,9 +450,16 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                       ? "Next"
                       : cached
                           ? AppLocale.mod_view_downloaded.getString(context)
-                          : modItem.isRewarded
-                              ? AppLocale.mod_view_watchads.getString(context)
-                              : AppLocale.mod_view_install.getString(context),
+                          : _phase == ModDetailPhase.pageDownload
+                              ? "Downloading" // 👈
+                              : "Next", // 👈 для pageLoaded
+                  // _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction
+                  //     ? "Next"
+                  //     : cached
+                  //         ? AppLocale.mod_view_downloaded.getString(context)
+                  //         : modItem.isRewarded
+                  //             ? AppLocale.mod_view_watchads.getString(context)
+                  //             : AppLocale.mod_view_install.getString(context),
                   style: TextStyle(
                     color: cached ? HexColor.fromHex("#8D8D8D") : Colors.white,
                     fontSize: 16,
@@ -464,7 +471,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           )),
       onTap: () async {
         if (_phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction) {
-          SingleNativeAdLoader().disposeAllAds();
+          // SingleNativeAdLoader().disposeAllAds();
           _nextPhase();
           return;
         }
@@ -478,6 +485,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
 
           if (paths.length == 1) {
             await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+            _nextPhase();
           } else {
             if (context.mounted) {
               Navigator.of(context, rootNavigator: true).pop();
@@ -628,6 +636,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
               cached = true;
             });
             await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+            _nextPhase();
 
             modService!.downloadMod(modItem);
             FileManager.downloadedModsAmount += 1;
