@@ -38,6 +38,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LogService.clearLog();
   await Firebase.initializeApp(); // Firebase initialization
+  await fetchRemoteConfig(); // Getting settings before launching CAS and nativeAd
   NativeAdManager().preLoadAd();
 
   if (Platform.isAndroid || Platform.isIOS) {
@@ -155,8 +156,6 @@ Future<void> init() async {
 
   // ColorsInfo.IsDark = isDarkSaved;
   await Future.delayed(Duration(milliseconds: 500));
-
-  await fetchRemoteConfig(); // Getting settings before launching CAS and nativeAd
 
   modService = ModService();
   modService!.mods = await modService!.fetchModItems();

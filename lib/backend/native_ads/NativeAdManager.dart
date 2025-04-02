@@ -24,8 +24,9 @@ class NativeAdManager {
 
   // 🔹 Перевірити: чи цей індекс — реклама
   bool isAdIndex(int index) {
-    if (!AdConfig.isAdsEnabled) return false; // 🔹 захист
-    return (index + 1) % (_adFrequency + 1) == 0;
+    final result = AdConfig.isAdsEnabled && ((index + 1) % (_adFrequency + 1) == 0);
+    LogService.log('isAdIndex: index=$index → $result');
+    return result;
   }
 
   // 🔹 Отримати реальний індекс моду (без реклами)
@@ -36,27 +37,38 @@ class NativeAdManager {
 
   // 🔹 Скільки всього елементів (моди + реклама)
   int getTotalItemCount(int modCount) {
-    return AdConfig.isAdsEnabled ? modCount + (modCount / _adFrequency).floor() : modCount;
+    final total = AdConfig.isAdsEnabled ? modCount + (modCount / _adFrequency).floor() : modCount;
+    LogService.log('getTotalItemCount: modCount=$modCount → total=$total');
+    return total;
   }
 
   // 🔹 Отримати рекламний віджет (кеш або загрузка)
   Widget getAdWidget(int index, {double? height, required VoidCallback refresh}) {
+    LogService.log('getAdWidget called with index=$index, adLoaded=${_adLoadedFlags[index] == true}');
+    LogService.log('🟡 getAdWidget CALLED from=${StackTrace.current}');
     if (!AdConfig.isAdsEnabled) {
+      LogService.log('❌ Ads disabled. Returning SizedBox for index=$index');
       return const SizedBox.shrink(); // 🔹 Реклама вимкнена
     }
 
     if (_nativeAds[index] == null) {
+      if (_nativeAds.containsKey(index)) {
+        LogService.log('🟠 getAdWidget using existing ad for index=$index');
+      } else {
+        LogService.log('🟢 getAdWidget creating new ad for index=$index');
+      }
       _nativeAds[index] = NativeAd(
         adUnitId: _adUnitId,
         factoryId: 'customNative',
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             _adLoadedFlags[index] = true;
-            LogService.log('NativeAdListener refresh()');
+            LogService.log('✅ Ad loaded for index=$index → triggering refresh()');
             refresh();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
+            LogService.log('❌ Ad failed to load for index=$index → $error');
           },
         ),
         request: const AdRequest(),
@@ -73,17 +85,19 @@ class NativeAdManager {
 
   // 🔹 Pre-load реклами для вказаних індексів
   void preLoadAd({List<int> indexes = const [5, 11, 17]}) {
+    LogService.log('preLoadAd called with indexes: $indexes');
     if (!AdConfig.isAdsEnabled) return; // 🔹 Не вантажити, якщо реклама вимкнена
 
     for (int index in indexes) {
       if (_nativeAds[index] == null) {
+        LogService.log('preLoadAd creating NativeAd for index=$index');
         _nativeAds[index] = NativeAd(
           adUnitId: _adUnitId,
           factoryId: 'customNative',
           listener: NativeAdListener(
             onAdLoaded: (ad) {
+              LogService.log('NativeAd loaded for index=$index');
               _adLoadedFlags[index] = true;
-              LogService.log('Preloading ad for indexes: $indexes');
             },
             onAdFailedToLoad: (ad, error) {
               ad.dispose();
@@ -97,6 +111,7 @@ class NativeAdManager {
 
   // 🔹 Динамічний pre-load при скролі з захистом від виходу за межі
   void maybePreloadAds(int currentIndex, int totalMods) {
+    LogService.log('maybePreloadAds at currentIndex=$currentIndex');
     if (!AdConfig.isAdsEnabled) return; // 🔹 Без реклами — нічого не робити
 
     if (currentIndex >= _lastPreloadedAdIndex - 4) {
@@ -105,8 +120,6 @@ class NativeAdManager {
       for (int i = 1; i <= 3; i++) {
         int nextAdIndex = _lastPreloadedAdIndex + i * 6;
         int maxAllowedAdIndex = getTotalItemCount(totalMods) - 1;
-        LogService.log('maybePreloadAds called at index: $currentIndex');
-
         if (nextAdIndex <= maxAllowedAdIndex) {
           newIndexes.add(nextAdIndex);
         }
@@ -116,11 +129,13 @@ class NativeAdManager {
         preLoadAd(indexes: newIndexes);
         _lastPreloadedAdIndex = newIndexes.last;
       }
+      LogService.log('maybePreloadAds: newIndexes to load: $newIndexes');
     }
   }
 
   // 🔹 Очистити всі ресурси та скинути стан
   void disposeAllAds() {
+    LogService.log('disposeAllAds called. Clearing ${_nativeAds.length} ads.');
     for (var ad in _nativeAds.values) {
       ad.dispose();
     }
