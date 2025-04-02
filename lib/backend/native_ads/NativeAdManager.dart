@@ -60,6 +60,9 @@ class NativeAdManager {
       _nativeAds[index] = NativeAd(
         adUnitId: _adUnitId,
         factoryId: 'customNative',
+        customOptions: {
+          'containerHeight': height!.toInt(),
+        },
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             _adLoadedFlags[index] = true;

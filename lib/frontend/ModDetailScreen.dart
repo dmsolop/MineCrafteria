@@ -224,7 +224,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             const SizedBox(height: 20),
             // const NativeAdSlot(height: 260, index: 0),
             NativeAdSlot(
-                height: 260,
+                height: 240,
                 keyId: 'description',
                 onLoaded: () {
                   setState(() {
@@ -243,7 +243,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             const SizedBox(height: 20),
             // const NativeAdSlot(height: 260, index: 1),
             NativeAdSlot(
-                height: 260,
+                height: 240,
                 keyId: 'instruction',
                 onLoaded: () {
                   setState(() {
@@ -264,7 +264,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             const SizedBox(height: 20),
             // const NativeAdSlot(height: 260, index: 2),
             NativeAdSlot(
-                height: 260,
+                height: 240,
                 keyId: 'pageDownload',
                 onLoaded: () {
                   setState(() {
@@ -285,7 +285,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             const SizedBox(height: 20),
             // const NativeAdSlot(height: 260, index: 3),
             NativeAdSlot(
-                height: 260,
+                height: 240,
                 keyId: 'pageLoaded',
                 onLoaded: () {
                   setState(() {
@@ -438,7 +438,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
 
     return InkWell(
       child: Container(
-          height: 57,
+          height: 60,
           width: screenWidth - 110,
           decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(15)), gradient: cached ? ColorsInfo.ColorToGradient(HexColor.fromHex("#586067")) : (modItem.isRewarded ? purpleGradient : yellowGradient)),
           child: Center(
