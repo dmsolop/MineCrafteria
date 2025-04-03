@@ -26,6 +26,7 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
         val screenWidthDp = context.resources.displayMetrics.widthPixels / context.resources.displayMetrics.density
         val useLargeCTA = containerHeight >= 220
         val ctaHeightDp = if (useLargeCTA) 60f else 40f
+        val ctaCornerRadius = if (useLargeCTA) 15f else 10f
         val ctaHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ctaHeightDp, context.resources.displayMetrics).toInt()
 
         // Minimum height: MediaView + padding + CTA + container padding
@@ -126,10 +127,10 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
         val callToAction = Button(context).apply {
             text = nativeAd.callToAction
             setTextColor(Color.parseColor("#8D8D8D"))
-            textSize = 20f
-            val baseTypeface = ResourcesCompat.getFont(context, R.font.joystix)
-            typeface = Typeface.create(baseTypeface, Typeface.BOLD)
-            //typeface = Typeface.DEFAULT_BOLD
+            textSize = 16f
+            //val baseTypeface = ResourcesCompat.getFont(context, R.font.joystix)
+            //typeface = Typeface.create(baseTypeface, Typeface.BOLD)
+            typeface = Typeface.DEFAULT_BOLD
             //typeface = Typeface.createFromAsset(context.assets, "fonts/Joystix.ttf")
             gravity = Gravity.CENTER
             layoutParams = RelativeLayout.LayoutParams(
@@ -140,7 +141,7 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
                 bottomMargin = 15.toPx(context)
             }
             background = GradientDrawable().apply {
-                cornerRadius = 15f * context.resources.displayMetrics.density
+                cornerRadius = ctaCornerRadius * context.resources.displayMetrics.density
                 setColor(Color.parseColor("#586067"))
             }
         }
