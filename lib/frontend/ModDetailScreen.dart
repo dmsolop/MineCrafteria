@@ -869,7 +869,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                             AdManager.interstitialListener = InterstitialListener(),
                             await AdManager.manager!.showInterstitial(AdManager.interstitialListener!),
                             await waitWhile(() => AdManager.interstitialListener!.adEnded),
-                            AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60)),
+                            // AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60)),
                           },
                       }
                     else
@@ -881,7 +881,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                                 AdManager.interstitialListener = InterstitialListener(),
                                 await AdManager.manager!.showInterstitial(AdManager.interstitialListener!),
                                 await waitWhile(() => AdManager.interstitialListener!.adEnded),
-                                AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60)),
+                                // AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60)),
                               },
                           }
                       }
