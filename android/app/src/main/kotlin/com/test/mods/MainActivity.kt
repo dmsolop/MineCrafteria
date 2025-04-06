@@ -11,7 +11,7 @@ import com.test.mods.CustomNativeAdFactory
 
 
 class MainActivity : FlutterActivity() {
-  private val CHANNEL = "com.test.mods/file_opener"
+  private val CHANNEL = "com.morph.mods.minecraft.addons/file_opener"
 
   override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
     super.configureFlutterEngine(flutterEngine)
