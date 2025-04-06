@@ -407,13 +407,13 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                   ),
                 ],
               ),
-        const SizedBox(
-          height: 15,
-        ),
-        Text(
-          AppLocale.mod_view_recommend.getString(context),
-          style: TextStyle(fontSize: 15, color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#353539")),
-        ),
+        // const SizedBox(
+        //   height: 15,
+        // ),
+        // Text(
+        //   AppLocale.mod_view_recommend.getString(context),
+        //   style: TextStyle(fontSize: 15, color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#353539")),
+        // ),
       ],
     );
   }
