@@ -105,7 +105,8 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     }
   }
 
-  void _nextPhase() {
+  void _nextPhase() async {
+    await _showInterstitialIfAvailable();
     setState(() {
       switch (_phase) {
         case ModDetailPhase.description:
@@ -121,6 +122,14 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           break;
       }
     });
+  }
+
+  Future<void> _showInterstitialIfAvailable() async {
+    if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
+      AdManager.interstitialListener = InterstitialListener();
+      await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+      await waitWhile(() => AdManager.interstitialListener!.adEnded);
+    }
   }
 
   @override
