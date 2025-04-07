@@ -222,9 +222,33 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   }
 
   Widget _buildBodyByPhase() {
+    LogService.log('[ModDetailScreen] Building phase: $_phase');
     switch (_phase) {
       case ModDetailPhase.description:
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=description');
+        // return SingleChildScrollView(
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       _buildModHeaderSection(),
+        //       const SizedBox(height: 20),
+        //       _buildModDescription(),
+        //       const SizedBox(height: 20),
+        //       NativeAdSlot(
+        //         height: 240,
+        //         keyId: 'description',
+        //         onLoaded: () {
+        //           setState(() {
+        //             print('Ad loaded for description phase!');
+        //           });
+        //         },
+        //       ),
+        //       const SizedBox(height: 20),
+        //       _buildInstallButton(),
+        //     ],
+        //   ),
+        // );
+
         return ListView(
           children: [
             _buildModHeaderSection(),
@@ -233,11 +257,16 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             const SizedBox(height: 20),
             // const NativeAdSlot(height: 260, index: 0),
             NativeAdSlot(
+                key: ValueKey('ad-description'),
                 height: 240,
                 keyId: 'description',
                 onLoaded: () {
-                  setState(() {
-                    print('Ad loaded for description phase!');
+                  Future.microtask(() {
+                    if (mounted) {
+                      setState(() {
+                        print('Ad loaded for description phase!');
+                      });
+                    }
                   });
                 }),
             const SizedBox(height: 20),

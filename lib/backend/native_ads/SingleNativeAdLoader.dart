@@ -29,7 +29,7 @@ class SingleNativeAdLoader {
   }) async {
     final index = _adIndexes[keyId];
     if (index == null) {
-      LogService.log('⚠️ loadAd: Unknown keyId=$keyId');
+      LogService.log('[SingleNativeAdLoader] 🚩 Proceeding with ad load → keyId=$keyId, index=$index');
       return null;
     }
 
@@ -42,6 +42,7 @@ class SingleNativeAdLoader {
 
     if (_cachedAds.containsKey(keyId)) {
       LogService.log('[SingleNativeAdLoader] ✅ Returning CACHED ad → keyId=$keyId');
+      onLoaded();
       return _cachedAds[keyId]!;
     }
 
@@ -53,6 +54,7 @@ class SingleNativeAdLoader {
         child: _adManager.getAdWidget(index, height: height, refresh: () {}),
       );
       _cachedAds[keyId] = widget;
+      onLoaded();
       return widget;
     }
 
@@ -69,7 +71,9 @@ class SingleNativeAdLoader {
           width: double.infinity,
           child: _adManager.getAdWidget(index, height: height, refresh: () {}),
         );
+        LogService.log('[SingleNativeAdLoader] refresh(): built adWidget → keyId=$keyId, type=${adWidget.runtimeType}');
         _cachedAds[keyId] = adWidget;
+        LogService.log('[SingleNativeAdLoader] refresh(): completer.complete() → keyId=$keyId');
         completer.complete(adWidget);
       }
     }

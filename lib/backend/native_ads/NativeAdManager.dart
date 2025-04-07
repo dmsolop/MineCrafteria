@@ -70,7 +70,7 @@ class NativeAdManager {
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             _adLoadedFlags[index] = true;
-            LogService.log('[NativeAdManager] ✅ onAdLoaded for index=$index, triggering refresh()');
+            LogService.log('[NativeAdManager] onAdLoaded → index=$index, calling refresh()');
 
             refresh();
           },
@@ -83,6 +83,7 @@ class NativeAdManager {
       )..load();
     }
 
+    LogService.log('[NativeAdManager] Returning widget for index=$index → ${_adLoadedFlags[index] == true ? 'AdWidget' : 'SizedBox'}');
     return _adLoadedFlags[index] == true
         ? Container(
             height: height ?? 300,

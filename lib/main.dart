@@ -37,6 +37,12 @@ ModService? modService;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await LogService.init();
+  await LogService.log('[main.dart] Clearing log...');
+  await LogService.clearLog();
+  await LogService.log('[main.dart] Log cleared');
+  await LogService.log('[Main] ✅ Log was cleared manually before WidgetsFlutterBinding.ensureInitialized');
+
   await Firebase.initializeApp(); // Firebase initialization
   await fetchRemoteConfig(); // Getting settings before launching CAS and nativeAd
   NativeAdManager().preLoadAd();
@@ -162,9 +168,6 @@ Future<void> init() async {
 
   // ColorsInfo.IsDark
   initialized = true;
-
-  LogService.init();
-  LogService.clearLog();
 }
 
 // the setState function here is a must to add

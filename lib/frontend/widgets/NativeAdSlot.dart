@@ -28,50 +28,37 @@ class _NativeAdSlotState extends State<NativeAdSlot> {
     if (_hasLoadedOnce) return;
     _hasLoadedOnce = true;
 
-    LogService.log('[NativeAdSlot] _loadAdOnce → keyId=${widget.keyId}');
+    final startTime = DateTime.now();
+    LogService.log('[NativeAdSlot] _loadAdOnce START → keyId=${widget.keyId}');
 
     Future.microtask(() {
-      LogService.log('[NativeAdSlot] Calling loadAd for keyId=${widget.keyId}');
+      final launchTime = DateTime.now();
+      LogService.log('[NativeAdSlot] ⏱ Ad load triggered → keyId=${widget.keyId}, delay=${launchTime.difference(startTime).inMilliseconds}ms');
+
       SingleNativeAdLoader().loadAd(
         context,
         keyId: widget.keyId,
         height: widget.height,
         onLoaded: () {
+          final loadedTime = DateTime.now();
+          LogService.log('[NativeAdSlot] ✅ onLoaded → keyId=${widget.keyId}, delay=${loadedTime.difference(launchTime).inMilliseconds}ms');
+
           if (!mounted) return;
           LogService.log('[NativeAdSlot] onLoaded → keyId=${widget.keyId}');
           setState(() {}); // 🔹 Тепер _adWidget оновиться автоматично
           widget.onLoaded?.call(); // 🔹 Додатковий кастомний колбек
         },
       ).then((ad) {
+        final endTime = DateTime.now();
         if (!mounted || ad == null) return;
-        LogService.log('[NativeAdSlot] loadAd() complete → keyId=${widget.keyId}');
+        LogService.log('[NativeAdSlot] 🧩 loadAd complete → keyId=${widget.keyId}, delay=${endTime.difference(startTime).inMilliseconds}ms');
         setState(() {
           _adWidget = ad;
         });
+        LogService.log('[NativeAdSlot] _adWidget set via setState → keyId=${widget.keyId}, runtimeType=${ad.runtimeType}');
       });
     });
   }
-
-  // void _loadAdOnce() {
-  //   if (_hasLoadedOnce) return;
-  //   _hasLoadedOnce = true;
-  //   LogService.log('[NativeAdSlot] _loadAdOnce → keyId=${widget.keyId}');
-  //   Future.microtask(() {
-  //     SingleNativeAdLoader().loadAd(context, keyId: widget.keyId, height: widget.height, onLoaded: () {
-  //       if (!mounted) return;
-  //       // if (mounted) setState(() {});
-  //       LogService.log('[NativeAdSlot] onLoaded → keyId=${widget.keyId}');
-  //       widget.onLoaded?.call();
-  //     }).then((ad) {
-  //       if (!mounted || ad == null) return;
-  //       LogService.log('[NativeAdSlot] loadAd() complete → keyId=${widget.keyId}');
-  //       setState(() {
-  //         _adWidget = ad; //?? const SizedBox.shrink();
-  //         // _loading = false;
-  //       });
-  //     });
-  //   });
-  // }
 
   @override
   void dispose() {
@@ -79,14 +66,9 @@ class _NativeAdSlotState extends State<NativeAdSlot> {
     super.dispose();
   }
 
-  // @override
-  // void dispose() {
-  //   SingleNativeAdLoader().forceReloadAd(widget.keyId);
-  //   super.dispose();
-  // }
-
   @override
   Widget build(BuildContext context) {
+    LogService.log('[NativeAdSlot] build START → keyId=${widget.keyId}, hasLoaded=$_hasLoadedOnce, widget=${_adWidget.runtimeType}');
     return SizedBox(height: widget.height, child: _adWidget);
   }
 }

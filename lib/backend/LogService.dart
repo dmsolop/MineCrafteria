@@ -22,7 +22,7 @@ class LogService {
       if (!await _logFile!.exists()) {
         await _logFile!.create(recursive: true);
       }
-
+      await _logFile!.writeAsString('[LogService] initialized path: $logPath\n', mode: FileMode.append);
       debugPrint('LogService initialized. Log file path: $logPath');
     } catch (e) {
       debugPrint('LogService init error: $e');
