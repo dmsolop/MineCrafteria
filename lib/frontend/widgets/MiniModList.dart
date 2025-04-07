@@ -7,6 +7,7 @@ import 'package:morph_mods/frontend/ModItemMini.dart';
 import 'package:morph_mods/backend/CacheManager.dart';
 import 'package:morph_mods/frontend/ModDetailScreen.dart';
 import 'package:morph_mods/frontend/ModDetailScreenPad.dart';
+import '../../backend/LogService.dart';
 
 enum DisplayMode {
   grid,
@@ -86,6 +87,7 @@ class _MiniModListState extends State<MiniModList> {
   Widget _buildMiniMod(ModItemData modItem, double aspectRatio) {
     final screenWidth = MediaQuery.of(context).size.width;
     final itemWidth = (screenWidth - 24) / 2; // 🔹 12+12 padding або spacing
+    LogService.log("MiniModList build() triggered");
 
     return SizedBox(
       width: itemWidth,
