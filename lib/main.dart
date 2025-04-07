@@ -660,13 +660,6 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                           ),
                           itemCount: NativeAdManager().getTotalItemCount(modItems.length),
                           itemBuilder: (context, index) {
-                            // // Showing ads after every 5 mods (position 6, 12, 18…)
-                            // if (NativeAdManager().isAdIndex(index)) {
-                            //   return NativeAdManager().getAdWidget(index,
-                            //       height: adItemHeight, refresh: () {
-                            //     setState(() {});
-                            //   });
-
                             if (NativeAdManager().isAdIndex(index)) {
                               NativeAdManager().maybePreloadAds(index, modItems.length); // 👈 Один виклик
 
