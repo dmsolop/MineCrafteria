@@ -36,7 +36,7 @@ ModService? modService;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  LogService.clearLog();
+
   await Firebase.initializeApp(); // Firebase initialization
   await fetchRemoteConfig(); // Getting settings before launching CAS and nativeAd
   NativeAdManager().preLoadAd();
@@ -112,7 +112,7 @@ Future<void> fetchRemoteConfig() async {
     bool enableAds = remoteConfig.getBool("enable_ads");
     debugPrint("✅ Firebase Remote Config received. enable_ads: $enableAds");
 
-    AdConfig.isAdsEnabled = enableAds;
+    AdConfig.isAdsEnabled = false; //enableAds;
     if (AdConfig.isAdsEnabled) {
       AdManager.initialize();
       MobileAds.instance.initialize();
@@ -162,6 +162,9 @@ Future<void> init() async {
 
   // ColorsInfo.IsDark
   initialized = true;
+
+  LogService.init();
+  LogService.clearLog();
 }
 
 // the setState function here is a must to add
