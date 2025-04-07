@@ -112,7 +112,7 @@ Future<void> fetchRemoteConfig() async {
     bool enableAds = remoteConfig.getBool("enable_ads");
     debugPrint("✅ Firebase Remote Config received. enable_ads: $enableAds");
 
-    AdConfig.isAdsEnabled = false; //enableAds;
+    AdConfig.isAdsEnabled = enableAds;
     if (AdConfig.isAdsEnabled) {
       AdManager.initialize();
       MobileAds.instance.initialize();
