@@ -15,6 +15,12 @@ class SingleNativeAdLoader {
     'pageLoaded': 103,
   };
 
+  bool isAdReady(String keyId) {
+    final index = _adIndexes[keyId];
+    if (index == null) return false;
+    return _adManager.isAdLoaded(index);
+  }
+
   /// Завантажити рекламу заздалегідь під час CAS або в іншому місці
   Future<void> preloadAd() async {
     LogService.log('[AdFlow] preloadAd(0) from SingleNativeAdLoader');

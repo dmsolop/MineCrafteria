@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:morph_mods/backend/AdManager.dart';
@@ -60,6 +61,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   bool cached = false;
 
   bool installProhibited = false;
+  Future<bool>? _adReadyFuture;
 
   SharedPreferences? prefs;
   List<String>? rewardedWatched;
@@ -73,6 +75,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   void initState() {
     super.initState();
     LogService.log('[ModDetailScreen] initState() — _phase=$_phase');
+
+    _adReadyFuture = _waitForAdLoaded('description');
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateCacheInfo();
       LogService.log('[ModDetailScreen] PostFrame — updating cache info');
@@ -85,6 +90,27 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     modItem.title = TextExtension.convertUTF8(modItem.title);
     modItem.author = TextExtension.convertUTF8(modItem.author);
     modItem.description = TextExtension.convertUTF8(modItem.description);
+  }
+
+  Future<bool> _waitForAdLoaded(String keyId, {Duration timeout = const Duration(seconds: 5)}) async {
+    final loader = SingleNativeAdLoader();
+    await loader.preloadAd();
+
+    final completer = Completer<bool>();
+    final start = DateTime.now();
+
+    void check() {
+      if (loader.isAdReady(keyId)) {
+        completer.complete(true);
+      } else if (DateTime.now().difference(start) > timeout) {
+        completer.complete(false);
+      } else {
+        Future.delayed(const Duration(milliseconds: 100), check);
+      }
+    }
+
+    check();
+    return completer.future;
   }
 
   @override
@@ -134,6 +160,20 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _adReadyFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return _buildScaffold(context); // 👈 Виносимо оригінальний Scaffold у метод
+      },
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     final random = Random();
