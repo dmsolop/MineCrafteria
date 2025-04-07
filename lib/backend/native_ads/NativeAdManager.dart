@@ -44,14 +44,18 @@ class NativeAdManager {
 
   // 🔹 Отримати рекламний віджет (кеш або загрузка)
   Widget getAdWidget(int index, {double? height, required VoidCallback refresh}) {
-    LogService.log('getAdWidget called with index=$index, adLoaded=${_adLoadedFlags[index] == true}');
-    LogService.log('🟡 getAdWidget CALLED from=${StackTrace.current}');
+    LogService.log('[NativeAdManager] getAdWidget called for index=$index');
+    if (!_nativeAds.containsKey(index) && index < 100) {
+      LogService.log('🚨 [NativeAdManager] getAdWidget() called with suspicious index=$index (less than 100)');
+    }
+
     if (!AdConfig.isAdsEnabled) {
       LogService.log('❌ Ads disabled. Returning SizedBox for index=$index');
       return const SizedBox.shrink(); // 🔹 Реклама вимкнена
     }
 
     if (_nativeAds[index] == null) {
+      LogService.log('[NativeAdManager] 🟡 Creating new NativeAd for index=$index');
       if (_nativeAds.containsKey(index)) {
         LogService.log('🟠 getAdWidget using existing ad for index=$index');
       } else {
@@ -66,12 +70,13 @@ class NativeAdManager {
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             _adLoadedFlags[index] = true;
-            LogService.log('✅ Ad loaded for index=$index → triggering refresh()');
+            LogService.log('[NativeAdManager] ✅ onAdLoaded for index=$index, triggering refresh()');
+
             refresh();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
-            LogService.log('❌ Ad failed to load for index=$index → $error');
+            LogService.log('[NativeAdManager] ❌ onAdFailedToLoad for index=$index → $error');
           },
         ),
         request: const AdRequest(),
