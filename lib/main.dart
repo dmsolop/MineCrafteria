@@ -667,7 +667,9 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                               NativeAdManager().maybePreloadAds(index, modItems.length); // 👈 Один виклик
 
                               return NativeAdManager().getAdWidget(index, height: adItemHeight, refresh: () {
-                                setState(() {});
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (mounted) setState(() {});
+                                });
                               });
                             }
 
