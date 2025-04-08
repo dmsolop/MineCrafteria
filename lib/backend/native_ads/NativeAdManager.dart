@@ -45,6 +45,7 @@ class NativeAdManager {
   // 🔹 Отримати рекламний віджет (кеш або загрузка)
   Widget getAdWidget(int index, {double? height, required VoidCallback refresh}) {
     LogService.log('[NativeAdManager] getAdWidget called for index=$index');
+
     if (!_nativeAds.containsKey(index) && index < 100) {
       LogService.log('🚨 [NativeAdManager] getAdWidget() called with suspicious index=$index (less than 100)');
     }
@@ -72,7 +73,7 @@ class NativeAdManager {
             _adLoadedFlags[index] = true;
             LogService.log('[NativeAdManager] onAdLoaded → index=$index, calling refresh()');
 
-            refresh();
+            refresh.call();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
@@ -83,7 +84,11 @@ class NativeAdManager {
       )..load();
     }
 
-    LogService.log('[NativeAdManager] Returning widget for index=$index → ${_adLoadedFlags[index] == true ? 'AdWidget' : 'SizedBox'}');
+    if (_adLoadedFlags[index] == true) {
+      LogService.log('[NativeAdManager] Ad is already loaded → triggering refresh() immediately for index=$index');
+      refresh.call(); // 👈 важливо
+    }
+
     return _adLoadedFlags[index] == true
         ? Container(
             height: height ?? 300,

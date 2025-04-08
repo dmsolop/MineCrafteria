@@ -23,6 +23,7 @@ import '../frontend/widgets/ModScreenshotGallery.dart';
 import '../backend/LogService.dart';
 import '../frontend/widgets/MiniModList.dart';
 import '../frontend/widgets/NativeAdSlot.dart';
+import 'package:morph_mods/frontend/widgets/NativeAdOverlayLoader.dart';
 
 bool hideDescription = false;
 
@@ -59,6 +60,8 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   FavoritesModListScreenState? favoriteListScreen;
   int modList;
   bool cached = false;
+  OverlayEntry? _adOverlay;
+  bool _overlayRemoved = false;
 
   bool installProhibited = false;
   Future<bool>? _adReadyFuture;
@@ -81,6 +84,10 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateCacheInfo();
       LogService.log('[ModDetailScreen] PostFrame — updating cache info');
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showAdOverlay();
     });
 
     SingleNativeAdLoader().preloadAd().then((_) {
@@ -134,6 +141,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   void _nextPhase() async {
     await _showInterstitialIfAvailable();
     setState(() {
+      _overlayRemoved = false;
       switch (_phase) {
         case ModDetailPhase.description:
           _phase = ModDetailPhase.instruction;
@@ -265,6 +273,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     LogService.log('[ModDetailScreen] Building phase: $_phase');
     switch (_phase) {
       case ModDetailPhase.description:
+        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=description');
         return ListView(
           children: [
@@ -277,8 +286,13 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 height: 240,
                 keyId: 'description',
                 onLoaded: () {
-                  setState(() {
-                    print('Ad loaded for description phase!');
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=description → removing overlay');
+                    if (mounted) {
+                      setState(() {
+                        _hideAdOverlay();
+                      });
+                    }
                   });
                 }),
             const SizedBox(height: 20),
@@ -286,6 +300,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           ],
         );
       case ModDetailPhase.instruction:
+        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=instruction');
         return ListView(
           children: [
@@ -296,8 +311,13 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 height: 240,
                 keyId: 'instruction',
                 onLoaded: () {
-                  setState(() {
-                    print('Ad loaded for instruction phase!');
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=instruction → removing overlay');
+                    if (mounted) {
+                      setState(() {
+                        _hideAdOverlay();
+                      });
+                    }
                   });
                 }),
             const SizedBox(height: 20),
@@ -305,6 +325,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           ],
         );
       case ModDetailPhase.pageDownload:
+        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=pageDownload');
         return ListView(
           children: [
@@ -317,8 +338,13 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 height: 240,
                 keyId: 'pageDownload',
                 onLoaded: () {
-                  setState(() {
-                    print('Ad loaded for pageDownload phase!');
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=pageDownload → removing overlay');
+                    if (mounted) {
+                      setState(() {
+                        _hideAdOverlay();
+                      });
+                    }
                   });
                 }),
             const SizedBox(height: 20),
@@ -326,6 +352,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           ],
         );
       case ModDetailPhase.pageLoaded:
+        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=pageLoaded');
         return ListView(
           children: [
@@ -338,8 +365,13 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 height: 240,
                 keyId: 'pageLoaded',
                 onLoaded: () {
-                  setState(() {
-                    print('Ad loaded for pageLoaded phase!');
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=pageLoaded → removing overlay');
+                    if (mounted) {
+                      setState(() {
+                        _hideAdOverlay();
+                      });
+                    }
                   });
                 }),
             const SizedBox(height: 20),
@@ -969,5 +1001,26 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
         return const LoadingDialog();
       },
     );
+  }
+
+  void _showAdOverlay() {
+    if (_overlayRemoved) return;
+
+    _adOverlay = OverlayEntry(
+      builder: (_) => const NativeAdOverlayLoader(),
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Overlay.of(context).insert(_adOverlay!);
+    });
+
+    _overlayRemoved = true;
+  }
+
+  void _hideAdOverlay() {
+    if (!_overlayRemoved) return;
+
+    _adOverlay?.remove();
+    _adOverlay = null;
   }
 }

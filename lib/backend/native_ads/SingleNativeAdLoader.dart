@@ -54,13 +54,20 @@ class SingleNativeAdLoader {
 
     if (_adManager.isAdLoaded(index)) {
       LogService.log('[SingleNativeAdLoader] ✅ Returning PRELOADED ad from NativeAdManager → keyId=$keyId index=$index');
+
+      void refresh() {
+        LogService.log('[SingleNativeAdLoader] ✅ refresh() (preloaded) called → keyId=$keyId');
+        onLoaded();
+      }
+
       final widget = SizedBox(
         height: height,
         width: double.infinity,
-        child: _adManager.getAdWidget(index, height: height, refresh: () {}),
+        child: _adManager.getAdWidget(index, height: height, refresh: () {
+          refresh();
+        }),
       );
       _cachedAds[keyId] = widget;
-      onLoaded();
       return widget;
     }
 
@@ -89,58 +96,6 @@ class SingleNativeAdLoader {
 
     return completer.future;
   }
-
-  // Future<Widget?> loadAd(
-  //   BuildContext context, {
-  //   required String keyId,
-  //   double height = 300,
-  //   required VoidCallback onLoaded,
-  // }) async {
-  //   LogService.log('[SingleNativeAdLoader] loadAd CALLED → keyId=$keyId');
-  //   if (keyId == 'description') {
-  //     LogService.log('[SingleNativeAdLoader] ❗️ loadAd(description) STACK TRACE ↓↓↓');
-  //     try {
-  //       throw Exception('StackTrace for loadAd(description)');
-  //     } catch (e, stack) {
-  //       LogService.log(stack.toString());
-  //     }
-  //   }
-  //   if (!AdConfig.isAdsEnabled) {
-  //     LogService.log('⚠️ loadAd skipped: Ads disabled, keyId=$keyId');
-  //     return null;
-  //   }
-
-  //   if (_cachedAds.containsKey(keyId)) {
-  //     LogService.log('[SingleNativeAdLoader] Returning CACHED ad → keyId=$keyId');
-  //     return _cachedAds[keyId]!;
-  //   }
-
-  //   final completer = Completer<Widget?>();
-  //   LogService.log('🚀 Starting loadAd for keyId=$keyId');
-
-  //   // 🔹 Ми передаємо refresh колбек, який спрацює, коли реклама реально готова
-  //   void refresh() {
-  //     LogService.log('[SingleNativeAdLoader] refresh() triggered for keyId=$keyId');
-  //     if (!completer.isCompleted) {
-  //       final widget = _adManager.getAdWidget(_adIndexes[keyId]!, height: height, refresh: () {});
-  //       final wrapped = SizedBox(height: height, width: double.infinity, child: widget);
-  //       _cachedAds[keyId] = wrapped;
-  //       onLoaded();
-  //       completer.complete(wrapped);
-  //     }
-  //   }
-
-  //   final index = _adIndexes[keyId]!;
-
-  //   _adManager.getAdWidget(index, height: height, refresh: refresh);
-
-  //   if (_adManager.isAdLoaded(index)) {
-  //     LogService.log('[SingleNativeAdLoader] ad already loaded, triggering refresh() manually');
-  //     refresh();
-  //   }
-
-  //   return completer.future;
-  // }
 
   void disposeAdByKey(String keyId) {
     _cachedAds.remove(keyId);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:morph_mods/backend/native_ads/SingleNativeAdLoader.dart';
 import '../../backend/LogService.dart';
@@ -22,6 +24,22 @@ class _NativeAdSlotState extends State<NativeAdSlot> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadAdOnce();
+  }
+
+  void _pollForReady() {
+    final loader = SingleNativeAdLoader();
+    Timer.periodic(Duration(milliseconds: 200), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      if (loader.isAdReady(widget.keyId)) {
+        LogService.log('[NativeAdSlot] 🟢 Ad became ready by polling → keyId=${widget.keyId}');
+        timer.cancel();
+        widget.onLoaded?.call(); // 🔹 це погасить прелоадер
+      }
+    });
   }
 
   void _loadAdOnce() {
@@ -57,6 +75,7 @@ class _NativeAdSlotState extends State<NativeAdSlot> {
         });
         LogService.log('[NativeAdSlot] _adWidget set via setState → keyId=${widget.keyId}, runtimeType=${ad.runtimeType}');
       });
+      _pollForReady();
     });
   }
 
