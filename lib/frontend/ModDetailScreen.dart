@@ -60,17 +60,17 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   FavoritesModListScreenState? favoriteListScreen;
   int modList;
   bool cached = false;
-  OverlayEntry? _adOverlay;
-  bool _overlayRemoved = false;
 
   bool installProhibited = false;
-  Future<bool>? _adReadyFuture;
-
   SharedPreferences? prefs;
   List<String>? rewardedWatched;
-  // NativeAdWidget
-  Widget? _nativeAdWidget;
   late List<ModItemData> recommendedMods;
+
+  OverlayEntry? _adOverlay;
+  bool _overlayRemoved = false;
+  bool _waitingForPhaseSwitch = false;
+  Future<bool>? _adReadyFuture;
+  Widget? _nativeAdWidget;
 
   ModDetailScreen({required this.modItem, required this.modListScreen, required this.favoriteListScreen, required this.modList});
 
@@ -139,9 +139,12 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   }
 
   void _nextPhase() async {
+    _waitingForPhaseSwitch = true;
     await _showInterstitialIfAvailable();
     setState(() {
       _overlayRemoved = false;
+      _waitingForPhaseSwitch = false;
+
       switch (_phase) {
         case ModDetailPhase.description:
           _phase = ModDetailPhase.instruction;
@@ -168,6 +171,12 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (_waitingForPhaseSwitch) {
+      return const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: NativeAdOverlayLoader(), // 👈 допустимо лише якщо це просто Widget, а не OverlayEntry
+      );
+    }
     return FutureBuilder<bool>(
       future: _adReadyFuture,
       builder: (context, snapshot) {
@@ -200,6 +209,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                   _overlayRemoved = false;
                   SingleNativeAdLoader().disposeAllAds(); // або NativeAdManager
                   _phase = ModDetailPhase.values[_phase.index - 1]; // попередня фаза
+                  _showInterstitialIfAvailable();
                 });
               }
             },
