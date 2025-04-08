@@ -197,6 +197,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                 Navigator.of(context).pop(); // назад до списку модів
               } else {
                 setState(() {
+                  _overlayRemoved = false;
                   SingleNativeAdLoader().disposeAllAds(); // або NativeAdManager
                   _phase = ModDetailPhase.values[_phase.index - 1]; // попередня фаза
                 });
