@@ -86,9 +86,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
       LogService.log('[ModDetailScreen] PostFrame — updating cache info');
     });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showAdOverlay();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _showAdOverlay();
+    // });
 
     SingleNativeAdLoader().preloadAd().then((_) {
       if (mounted) setState(() {});
@@ -173,7 +173,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   Widget build(BuildContext context) {
     if (_waitingForPhaseSwitch) {
       return const Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black54,
         body: NativeAdOverlayLoader(), // 👈 допустимо лише якщо це просто Widget, а не OverlayEntry
       );
     }
@@ -182,7 +182,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(child: NativeAdOverlayLoader()),
           );
         }
         return _buildScaffold(context); // 👈 Виносимо оригінальний Scaffold у метод
@@ -207,7 +207,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
               } else {
                 setState(() {
                   _overlayRemoved = false;
-                  SingleNativeAdLoader().disposeAllAds(); // або NativeAdManager
+                  // SingleNativeAdLoader().disposeAllAds(); // або NativeAdManager
                   _phase = ModDetailPhase.values[_phase.index - 1]; // попередня фаза
                   _showInterstitialIfAvailable();
                 });
@@ -284,7 +284,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     LogService.log('[ModDetailScreen] Building phase: $_phase');
     switch (_phase) {
       case ModDetailPhase.description:
-        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=description');
         return ListView(
           children: [
@@ -296,6 +295,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             NativeAdSlot(
                 height: 240,
                 keyId: 'description',
+                onEnterViewport: () {
+                  _showAdOverlay();
+                },
                 onLoaded: () {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=description → removing overlay');
@@ -311,7 +313,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           ],
         );
       case ModDetailPhase.instruction:
-        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=instruction');
         return ListView(
           children: [
@@ -321,6 +322,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             NativeAdSlot(
                 height: 240,
                 keyId: 'instruction',
+                onEnterViewport: () {
+                  _showAdOverlay();
+                },
                 onLoaded: () {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=instruction → removing overlay');
@@ -336,7 +340,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           ],
         );
       case ModDetailPhase.pageDownload:
-        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=pageDownload');
         return ListView(
           children: [
@@ -348,6 +351,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             NativeAdSlot(
                 height: 240,
                 keyId: 'pageDownload',
+                onEnterViewport: () {
+                  _showAdOverlay();
+                },
                 onLoaded: () {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=pageDownload → removing overlay');
@@ -363,7 +369,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           ],
         );
       case ModDetailPhase.pageLoaded:
-        _showAdOverlay();
         LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=pageLoaded');
         return ListView(
           children: [
@@ -375,6 +380,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             NativeAdSlot(
                 height: 240,
                 keyId: 'pageLoaded',
+                onEnterViewport: () {
+                  _showAdOverlay();
+                },
                 onLoaded: () {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=pageLoaded → removing overlay');
