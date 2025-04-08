@@ -13,6 +13,7 @@ class SingleNativeAdLoader {
     'instruction': 101,
     'pageDownload': 102,
     'pageLoaded': 103,
+    'pageFinal': 104,
   };
 
   bool isAdReady(String keyId) {

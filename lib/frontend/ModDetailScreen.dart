@@ -12,6 +12,7 @@ import 'package:morph_mods/frontend/FavoritesScreen.dart';
 import 'package:morph_mods/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'ColorsInfo.dart';
+import 'ModItem.dart';
 import 'ModItemData.dart';
 import 'package:morph_mods/extensions/color_extension.dart';
 import 'package:flutter_localization/flutter_localization.dart';
@@ -24,6 +25,8 @@ import '../backend/LogService.dart';
 import '../frontend/widgets/MiniModList.dart';
 import '../frontend/widgets/NativeAdSlot.dart';
 import 'package:morph_mods/frontend/widgets/NativeAdOverlayLoader.dart';
+import '../frontend/ModItem.dart';
+import '../frontend/ModItemData.dart';
 
 bool hideDescription = false;
 
@@ -32,6 +35,7 @@ enum ModDetailPhase {
   instruction,
   pageDownload,
   pageLoaded,
+  pageFinal,
 }
 
 final blueGradient = LinearGradient(colors: [HexColor.fromHex("#E5A272"), HexColor.fromHex("#E5A272")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight);
@@ -70,7 +74,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   bool _overlayRemoved = false;
   bool _waitingForPhaseSwitch = false;
   Future<bool>? _adReadyFuture;
-  Widget? _nativeAdWidget;
 
   ModDetailScreen({required this.modItem, required this.modListScreen, required this.favoriteListScreen, required this.modList});
 
@@ -156,6 +159,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           _phase = ModDetailPhase.pageLoaded;
           break;
         case ModDetailPhase.pageLoaded:
+          _phase = ModDetailPhase.pageFinal;
+          break;
+        case ModDetailPhase.pageFinal:
           break;
       }
     });
@@ -191,10 +197,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   }
 
   Widget _buildScaffold(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    final random = Random();
-
     return Scaffold(
         backgroundColor: ColorsInfo.GetColor(ColorType.Second),
         bottomNavigationBar: AdManager.getBottomBannerBackground(context),
@@ -202,7 +204,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
           leading: IconButton(
             icon: ColorsInfo.GetBackButton(),
             onPressed: () {
-              if (_phase == ModDetailPhase.description) {
+              if (_phase == ModDetailPhase.description || _phase == ModDetailPhase.pageFinal) {
                 Navigator.of(context).pop(); // назад до списку модів
               } else {
                 setState(() {
@@ -397,6 +399,46 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             _buildInstallButton(),
           ],
         );
+      case ModDetailPhase.pageFinal:
+        LogService.log('[ModDetailScreen] Rendering NativeAdSlot → keyId=pageFinal');
+        return ListView(
+          children: [
+            _buildModHeaderSection(),
+            const SizedBox(height: 20),
+            _buildMinimodGrid(),
+            const SizedBox(height: 20),
+            NativeAdSlot(
+              height: 240,
+              keyId: 'pageFinal',
+              onEnterViewport: () {
+                _showAdOverlay();
+              },
+              onLoaded: () {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  LogService.log('[ModDetailScreen] 🔚 Ad loaded for keyId=pageFinal → removing overlay');
+                  if (mounted) {
+                    setState(() {
+                      _hideAdOverlay();
+                    });
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 40),
+            Text(
+              "Recommended mods:",
+              style: TextStyle(fontSize: 15, color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#353539")),
+            ),
+            const SizedBox(height: 10),
+            _buildMinimodscroll(),
+            const SizedBox(height: 20),
+            _buildMoreModsButton(),
+            const SizedBox(height: 20),
+            _buildFinalModList(),
+            const SizedBox(height: 20),
+            _buildInstallButton(), // 👈 кнопка "Open mod"
+          ],
+        );
     }
   }
 
@@ -533,6 +575,115 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     );
   }
 
+  Widget _buildMinimodscroll() {
+    return Container(
+      color: ColorsInfo.GetColor(ColorType.Second),
+      child: MiniModList(
+        count: 6,
+        mode: DisplayMode.scroll,
+        sourceMods: modService!.mods[modList],
+        modListIndex: modList,
+        modListScreen: modListScreen,
+        favoriteListScreen: favoriteListScreen,
+      ),
+    );
+  }
+
+  Widget _buildMoreModsButton() {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return InkWell(
+      child: Container(
+          height: 60,
+          width: screenWidth - 110,
+          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(15)), gradient: ColorsInfo.ColorToGradient(HexColor.fromHex("#586067"))),
+          child: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "More mods",
+                  style: TextStyle(
+                    color: cached ? HexColor.fromHex("#8D8D8D") : Colors.white,
+                    fontSize: 16,
+                    fontFamily: "Joystix_Bold",
+                  ),
+                ),
+              ],
+            ),
+          )),
+      onTap: () async {
+        Navigator.of(context).pop();
+      },
+    );
+  }
+
+  Widget _buildFinalModList() {
+    final List<ModItemData> mods = modService!.mods[modList];
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = screenWidth > 700 ? 3 : 2;
+    final spacing = 12.0;
+    final itemWidth = (screenWidth - (crossAxisCount - 1) * spacing - 32) / crossAxisCount;
+    final itemHeight = itemWidth * 1.35;
+
+    void openModFromCurrentScreen(ModItemData newModItem) async {
+      if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
+        AdManager.interstitialListener = InterstitialListener();
+        await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+        await waitWhile(() => AdManager.interstitialListener!.adEnded);
+      }
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => ModDetailScreenWidget(
+            modItem: newModItem,
+            modListScreen: modListScreen,
+            favoritesListScreen: favoriteListScreen,
+            modListIndex: modList,
+          ),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: const Duration(milliseconds: 150),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            if (animation.status == AnimationStatus.reverse) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: const Offset(0, 0),
+                ).animate(animation),
+                child: child,
+              );
+            } else {
+              return child;
+            }
+          },
+        ),
+      );
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: 3,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing,
+        mainAxisExtent: itemHeight,
+      ),
+      itemBuilder: (context, index) {
+        final mod = mods[index];
+        return GestureDetector(
+          onTap: () => openModFromCurrentScreen(mod),
+          child: ModItem(modItemData: mod),
+        );
+      },
+    );
+  }
+
   Widget _buildInstallButton() {
     final screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -553,7 +704,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
                           ? AppLocale.mod_view_downloaded.getString(context)
                           : _phase == ModDetailPhase.pageDownload
                               ? "Downloading" // 👈
-                              : "Next", // 👈 для pageLoaded
+                              : _phase == ModDetailPhase.pageFinal
+                                  ? "Open mod"
+                                  : "Next", // 👈 для pageLoaded
                   // _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction
                   //     ? "Next"
                   //     : cached
@@ -571,7 +724,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             ),
           )),
       onTap: () async {
-        if (_phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction) {
+        if (_phase != ModDetailPhase.pageFinal)
+        //  if (_phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction)
+        {
           // SingleNativeAdLoader().disposeAllAds();
           _nextPhase();
           return;
@@ -751,263 +906,6 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             }
           }
         }
-      },
-    );
-  }
-
-  Widget _buildNativeAdWidget() {
-    if (_nativeAdWidget != null) {
-      return _nativeAdWidget!;
-    } else {
-      return const SizedBox.shrink();
-    }
-  }
-
-  Widget _buildInstallButton2() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
-    return InkWell(
-      child: Container(
-          height: 57,
-          width: screenWidth - 110,
-          // constraints: BoxConstraints(maxWidth: 500),
-          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(15)), gradient: cached ? ColorsInfo.ColorToGradient(HexColor.fromHex("#586067")) : (modItem.isRewarded ? purpleGradient : yellowGradient)),
-          // color: HexColor.fromHex("#353539"),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  // _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction
-                  //     ? "Next"
-                  //     : cached
-                  //         ? AppLocale.mod_view_downloaded.getString(context)
-                  //         : modItem.isRewarded
-                  //             ? AppLocale.mod_view_watchads.getString(context)
-                  //             : AppLocale.mod_view_install.getString(context),
-                  cached ? AppLocale.mod_view_downloaded.getString(context) : (modItem.isRewarded ? AppLocale.mod_view_watchads.getString(context) : AppLocale.mod_view_install.getString(context)),
-                  style: TextStyle(color: cached ? HexColor.fromHex("#8D8D8D") : Colors.white, fontSize: 16, fontFamily: "Joystix_Bold"),
-                ),
-              ],
-            ),
-          )),
-      onTap: () async => {
-        if (modItem.isPremium)
-          {
-            if (!true)
-              {}
-            else
-              {
-                _showLoadingDialog(context),
-                paths = await FileManager.downloadAndExtractFile(modItem.downloadURL),
-                setState(() {
-                  cached = true;
-                }),
-                if (paths.length == 1)
-                  {
-                    await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context),
-                    // await Share.shareXFiles([XFile(paths[0])])
-                  }
-                else
-                  {
-                    if (context.mounted)
-                      {
-                        Navigator.of(context, rootNavigator: true).pop(),
-                        await showModalBottomSheet<void>(
-                          context: context,
-                          backgroundColor: ColorsInfo.GetColor(ColorType.Second),
-                          builder: (BuildContext context) {
-                            return SingleChildScrollView(
-                                child: Container(
-                              height: screenHeight / 3,
-                              color: ColorsInfo.GetColor(ColorType.Main),
-                              child: Center(
-                                child: ListView(
-                                  // mainAxisAlignment: MainAxisAlignment.center,
-                                  // mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    for (var path in paths)
-                                      Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: SingleChildScrollView(
-                                            child: Container(
-                                              color: ColorsInfo.GetColor(ColorType.Second),
-                                              width: screenWidth - 50,
-                                              height: 50,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.all(5),
-                                                    child: SizedBox(
-                                                      width: screenWidth - 200,
-                                                      child: Text(
-                                                        p.basename(path),
-                                                        style: TextStyle(fontFamily: 'Joystix', color: ColorsInfo.IsDark ? Colors.white : Colors.black),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Padding(
-                                                    padding: const EdgeInsets.all(5),
-                                                    child: InkWell(
-                                                      child: Container(
-                                                        height: 40,
-                                                        color: ColorsInfo.GetColor(ColorType.Main),
-                                                        child: Padding(
-                                                          padding: const EdgeInsets.all(5),
-                                                          child: Center(
-                                                            child: Text(
-                                                              AppLocale.mod_view_install.getString(context),
-                                                              style: TextStyle(fontFamily: 'Joystix', color: ColorsInfo.IsDark ? Colors.white : Colors.black),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      onTap: () async => {
-                                                        // await Share.shareXFiles([XFile(path)])
-                                                        await FileOpener.openFileWithApp(path, screenWidth, screenHeight, context),
-                                                      },
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ))
-                                  ],
-                                ),
-                              ),
-                            ));
-                          },
-                        ),
-                      }
-                  },
-                modService!.downloadMod(modItem),
-                FileManager.downloadedModsAmount += 1,
-                if (FileManager.downloadedModsAmount == 2)
-                  {
-                    if (await InAppReview.instance.isAvailable()) {InAppReview.instance.requestReview()}
-                  },
-                if (paths.length == 1)
-                  {
-                    Navigator.of(context, rootNavigator: true).pop(),
-                  }
-              }
-          }
-        else
-          {
-            installProhibited = false,
-            if (true)
-              {
-                if (modItem.isRewarded)
-                  {
-                    installProhibited = true,
-                    if (await AdManager.manager!.isRewardedAdReady())
-                      {
-                        AdManager.rewardedListener = RewardedListener(),
-                        await AdManager.manager!.showRewarded(AdManager.rewardedListener!),
-
-                        await waitWhile(() => AdManager.rewardedListener!.adEnded),
-
-                        if (AdManager.rewardedListener!.rewardGranted)
-                          {
-                            installProhibited = false,
-                            prefs = await SharedPreferences.getInstance(),
-                            rewardedWatched = prefs!.getStringList("rewardedWatched") ?? List.empty(growable: true),
-                            rewardedWatched!.add(modItem.getModID()),
-                            await prefs!.setStringList("rewardedWatched", rewardedWatched!),
-                            setState(() {
-                              modItem.isRewarded = false;
-                            }),
-                            if (modListScreen != null)
-                              {
-                                modListScreen!.setState(() {
-                                  modService!.updateModRewarded(modItem);
-                                })
-                              }
-                            else if (favoriteListScreen != null)
-                              {
-                                favoriteListScreen!.setState(() {
-                                  modService!.updateModRewarded(modItem);
-                                })
-                              }
-                          }
-
-                        // AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60)),
-                      }
-                    else
-                      {
-                        Future.delayed(const Duration(seconds: 1), () {
-                          Navigator.of(context, rootNavigator: true).pop();
-                        }),
-                        if (context.mounted)
-                          showDialog<void>(
-                            context: context,
-                            barrierDismissible: false, // user must tap button!
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                content: SingleChildScrollView(
-                                  child: Center(
-                                    child: Text(
-                                      AppLocale.mod_view_error_ads.getString(context),
-                                      style: const TextStyle(fontFamily: "Joystix"),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          )
-                      }
-                  }
-                else
-                  {
-                    if (AdManager.nextTimeInterstitial == null)
-                      {
-                        if (await AdManager.manager!.isInterstitialReady())
-                          {
-                            AdManager.interstitialListener = InterstitialListener(),
-                            await AdManager.manager!.showInterstitial(AdManager.interstitialListener!),
-                            await waitWhile(() => AdManager.interstitialListener!.adEnded),
-                            // AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60)),
-                          },
-                      }
-                    else
-                      {
-                        if (AdManager.nextTimeInterstitial!.isBefore(DateTime.now()))
-                          {
-                            if (await AdManager.manager!.isInterstitialReady())
-                              {
-                                AdManager.interstitialListener = InterstitialListener(),
-                                await AdManager.manager!.showInterstitial(AdManager.interstitialListener!),
-                                await waitWhile(() => AdManager.interstitialListener!.adEnded),
-                                // AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60)),
-                              },
-                          }
-                      }
-                  }
-              },
-            if (!installProhibited)
-              {
-                if (context.mounted) _showLoadingDialog(context),
-                paths = await FileManager.downloadAndExtractFile(modItem.downloadURL),
-                setState(() {
-                  cached = true;
-                }),
-                await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context),
-                modService!.downloadMod(modItem),
-                FileManager.downloadedModsAmount += 1,
-                if (FileManager.downloadedModsAmount == 2)
-                  {
-                    if (await InAppReview.instance.isAvailable()) {InAppReview.instance.requestReview()}
-                  },
-                if (paths.length == 1)
-                  {
-                    if (context.mounted) Navigator.of(context, rootNavigator: true).pop(),
-                  }
-              },
-          }
       },
     );
   }
