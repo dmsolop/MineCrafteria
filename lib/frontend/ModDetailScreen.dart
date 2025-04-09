@@ -621,10 +621,9 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   Widget _buildFinalModList() {
     final List<ModItemData> mods = modService!.mods[modList];
     final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = screenWidth > 700 ? 3 : 2;
-    final spacing = 12.0;
-    final itemWidth = (screenWidth - (crossAxisCount - 1) * spacing - 32) / crossAxisCount;
-    final itemHeight = itemWidth * 1.35;
+    final crossAxisCount = screenWidth > 700 ? 3 : (screenWidth < 500 ? 1 : 2);
+    const spacing = 8.0;
+    const itemHeight = 215.0;
 
     void openModFromCurrentScreen(ModItemData newModItem) async {
       if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
@@ -673,6 +672,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
         mainAxisSpacing: spacing,
         crossAxisSpacing: spacing,
         mainAxisExtent: itemHeight,
+        childAspectRatio: 225 / 205,
       ),
       itemBuilder: (context, index) {
         final mod = mods[index];
