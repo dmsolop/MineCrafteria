@@ -45,7 +45,7 @@ void main() async {
 
   await Firebase.initializeApp(); // Firebase initialization
   await fetchRemoteConfig(); // Getting settings before launching CAS and nativeAd
-  NativeAdManager().preLoadAd();
+  NativeAdManager().preLoadAd(style: NativeAdStyle.grid);
 
   if (Platform.isAndroid || Platform.isIOS) {
     bool isTabletDevice = await isTablet();
@@ -664,9 +664,9 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                           itemCount: NativeAdManager().getTotalItemCount(modItems.length),
                           itemBuilder: (context, index) {
                             if (NativeAdManager().isAdIndex(index)) {
-                              NativeAdManager().maybePreloadAds(index, modItems.length); // 👈 Один виклик
+                              NativeAdManager().maybePreloadAds(index, modItems.length, style: NativeAdStyle.grid); // 👈 Один виклик
 
-                              return NativeAdManager().getAdWidget(index, height: adItemHeight, refresh: () {
+                              return NativeAdManager().getAdWidget(index, height: adItemHeight, style: NativeAdStyle.grid, refresh: () {
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   if (mounted) setState(() {});
                                 });

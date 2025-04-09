@@ -22,9 +22,12 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
         val adView = NativeAdView(context)
 
         // Determining the height of the CTA button
-        val containerHeight = customOptions?.get("containerHeight") as? Int ?: -1
+        val adStyle = customOptions?.get("adStyle") as? String ?: "grid"
         val screenWidthDp = context.resources.displayMetrics.widthPixels / context.resources.displayMetrics.density
-        val useLargeCTA = containerHeight >= 220
+        val useLargeCTA = when (adStyle) {
+            "flowPhase" -> true
+            else -> false
+        }
         val ctaHeightDp = if (useLargeCTA) 60f else 40f
         val ctaCornerRadius = if (useLargeCTA) 15f else 10f
         val ctaHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ctaHeightDp, context.resources.displayMetrics).toInt()

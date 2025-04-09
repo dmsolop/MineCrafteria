@@ -4,6 +4,12 @@ import '../AccessKeys.dart';
 import '../AdManager.dart';
 import '../../backend/LogService.dart';
 
+enum NativeAdStyle {
+  flowPhase, // для екранів флоу (description, instruction тощо)
+  grid, // для головного списку модів
+  miniMod, // для мінімодів, якщо буде потрібно
+}
+
 class NativeAdManager {
   // Singleton інстанс
   static final NativeAdManager _instance = NativeAdManager._internal();
@@ -43,7 +49,12 @@ class NativeAdManager {
   }
 
   // 🔹 Отримати рекламний віджет (кеш або загрузка)
-  Widget getAdWidget(int index, {double? height, required VoidCallback refresh}) {
+  Widget getAdWidget(
+    int index, {
+    double? height,
+    required NativeAdStyle style,
+    required VoidCallback refresh,
+  }) {
     LogService.log('[NativeAdManager] getAdWidget called for index=$index');
 
     if (!_nativeAds.containsKey(index) && index < 100) {
@@ -66,7 +77,7 @@ class NativeAdManager {
         adUnitId: _adUnitId,
         factoryId: 'customNative',
         customOptions: {
-          'containerHeight': height!.toInt(),
+          'adStyle': style.name,
         },
         listener: NativeAdListener(
           onAdLoaded: (ad) {
@@ -98,7 +109,10 @@ class NativeAdManager {
   }
 
   // 🔹 Pre-load реклами для вказаних індексів
-  void preLoadAd({List<int> indexes = const [5, 11, 17]}) {
+  void preLoadAd({
+    List<int> indexes = const [5, 11, 17],
+    required NativeAdStyle style,
+  }) {
     LogService.log('preLoadAd called with indexes: $indexes');
     if (!AdConfig.isAdsEnabled) return; // 🔹 Не вантажити, якщо реклама вимкнена
 
@@ -108,6 +122,9 @@ class NativeAdManager {
         _nativeAds[index] = NativeAd(
           adUnitId: _adUnitId,
           factoryId: 'customNative',
+          customOptions: {
+            'adStyle': style.name,
+          },
           listener: NativeAdListener(
             onAdLoaded: (ad) {
               LogService.log('NativeAd loaded for index=$index');
@@ -124,7 +141,11 @@ class NativeAdManager {
   }
 
   // 🔹 Динамічний pre-load при скролі з захистом від виходу за межі
-  void maybePreloadAds(int currentIndex, int totalMods) {
+  void maybePreloadAds(
+    int currentIndex,
+    int totalMods, {
+    required NativeAdStyle style,
+  }) {
     LogService.log('maybePreloadAds at currentIndex=$currentIndex');
     if (!AdConfig.isAdsEnabled) return; // 🔹 Без реклами — нічого не робити
 
@@ -140,7 +161,7 @@ class NativeAdManager {
       }
 
       if (newIndexes.isNotEmpty) {
-        preLoadAd(indexes: newIndexes);
+        preLoadAd(indexes: newIndexes, style: style);
         _lastPreloadedAdIndex = newIndexes.last;
       }
       LogService.log('maybePreloadAds: newIndexes to load: $newIndexes');

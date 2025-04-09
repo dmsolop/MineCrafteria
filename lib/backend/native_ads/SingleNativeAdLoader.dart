@@ -25,7 +25,7 @@ class SingleNativeAdLoader {
   /// Завантажити рекламу заздалегідь під час CAS або в іншому місці
   Future<void> preloadAd() async {
     LogService.log('[AdFlow] preloadAd(0) from SingleNativeAdLoader');
-    _adManager.preLoadAd(indexes: _adIndexes.values.toList()); // 🔹 Реклама вантажиться в кеш AdNativeManager
+    _adManager.preLoadAd(indexes: _adIndexes.values.toList(), style: NativeAdStyle.flowPhase); // 🔹 Реклама вантажиться в кеш AdNativeManager
   }
 
   Future<Widget?> loadAd(
@@ -64,7 +64,7 @@ class SingleNativeAdLoader {
       final widget = SizedBox(
         height: height,
         width: double.infinity,
-        child: _adManager.getAdWidget(index, height: height, refresh: () {
+        child: _adManager.getAdWidget(index, height: height, style: NativeAdStyle.flowPhase, refresh: () {
           refresh();
         }),
       );
@@ -83,7 +83,7 @@ class SingleNativeAdLoader {
         final adWidget = SizedBox(
           height: height,
           width: double.infinity,
-          child: _adManager.getAdWidget(index, height: height, refresh: () {}),
+          child: _adManager.getAdWidget(index, height: height, style: NativeAdStyle.flowPhase, refresh: () {}),
         );
         LogService.log('[SingleNativeAdLoader] refresh(): built adWidget → keyId=$keyId, type=${adWidget.runtimeType}');
         _cachedAds[keyId] = adWidget;
@@ -93,7 +93,7 @@ class SingleNativeAdLoader {
     }
 
     // 🔹 Тригеримо початкове завантаження
-    _adManager.getAdWidget(index, height: height, refresh: refresh);
+    _adManager.getAdWidget(index, height: height, style: NativeAdStyle.flowPhase, refresh: refresh);
 
     return completer.future;
   }
