@@ -687,48 +687,73 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
   Widget _buildInstallButton() {
     final screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
+    final isInstruction = _phase == ModDetailPhase.instruction;
+    final isDescription = _phase == ModDetailPhase.description;
+    final isDownloadPhase = _phase == ModDetailPhase.pageDownload;
+    final isPageLoaded = _phase == ModDetailPhase.pageLoaded;
+    final isFinal = _phase == ModDetailPhase.pageFinal;
+
+    String buttonText = "Next";
+    if (isDownloadPhase) {
+      buttonText = "Download";
+    } else if (isPageLoaded || isDescription || isInstruction) {
+      buttonText = "Next";
+    } else if (isFinal) {
+      buttonText = "Open mod";
+    }
+    // else if (cached) {
+    //   buttonText = AppLocale.mod_view_downloaded.getString(context);
+    // }
 
     return InkWell(
       child: Container(
-          height: 60,
-          width: screenWidth - 110,
-          decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(15)), gradient: cached ? ColorsInfo.ColorToGradient(HexColor.fromHex("#586067")) : (modItem.isRewarded ? purpleGradient : yellowGradient)),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction
-                      ? "Next"
-                      : cached
-                          ? AppLocale.mod_view_downloaded.getString(context)
-                          : _phase == ModDetailPhase.pageDownload
-                              ? "Downloading" // 👈
-                              : _phase == ModDetailPhase.pageFinal
-                                  ? "Open mod"
-                                  : "Next", // 👈 для pageLoaded
-                  // _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction
-                  //     ? "Next"
-                  //     : cached
-                  //         ? AppLocale.mod_view_downloaded.getString(context)
-                  //         : modItem.isRewarded
-                  //             ? AppLocale.mod_view_watchads.getString(context)
-                  //             : AppLocale.mod_view_install.getString(context),
-                  style: TextStyle(
-                    color: cached ? HexColor.fromHex("#8D8D8D") : Colors.white,
-                    fontSize: 16,
-                    fontFamily: "Joystix_Bold",
-                  ),
+        height: 60,
+        width: screenWidth - 110,
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          gradient: cached ? ColorsInfo.ColorToGradient(HexColor.fromHex("#586067")) : (modItem.isRewarded ? purpleGradient : yellowGradient),
+        ),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                buttonText,
+                style: TextStyle(
+                  color: cached ? HexColor.fromHex("#8D8D8D") : Colors.white,
+                  fontSize: 16,
+                  fontFamily: "Joystix_Bold",
                 ),
-              ],
-            ),
-          )),
+              ),
+            ],
+          ),
+        ),
+      ),
       onTap: () async {
-        if (_phase != ModDetailPhase.pageFinal)
-        //  if (_phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction)
-        {
-          // SingleNativeAdLoader().disposeAllAds();
+        if (isDownloadPhase || _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction) {
+          if (_phase == ModDetailPhase.pageDownload) {
+            if (context.mounted) {
+              _showLoadingDialog(context);
+              LogService.log("🔄 Download started — phase=$_phase");
+            }
+            paths = await FileManager.downloadAndExtractFile(modItem.downloadURL);
+            LogService.log("✅ Download finished — phase=$_phase, cached=$cached, paths=${paths.length}");
+
+            setState(() {
+              cached = true;
+            });
+
+            if (context.mounted) {
+              Navigator.of(context, rootNavigator: true).pop();
+              LogService.log("🛑 Hiding dialog — phase=$_phase");
+            }
+          }
           _nextPhase();
+          return;
+        }
+
+        if (isFinal) {
+          await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
           return;
         }
 
@@ -826,7 +851,10 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             }
           }
           if (paths.length == 1) {
+            LogService.log('[ModDetailScreen] Closing loading dialog (single file)');
             Navigator.of(context, rootNavigator: true).pop();
+          } else {
+            LogService.log('[ModDetailScreen] Multiple files downloaded. Not closing dialog here.');
           }
         } else {
           installProhibited = false;
@@ -903,12 +931,240 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             }
             if (paths.length == 1) {
               if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+            } else {
+              LogService.log('[ModDetailScreen] Warning: Downloaded paths.length != 1 → no dialog closed');
             }
           }
         }
       },
     );
   }
+
+  // Widget _buildInstallButton() {
+  //   final screenWidth = MediaQuery.of(context).size.width;
+  //   double screenHeight = MediaQuery.of(context).size.height;
+
+  //   return InkWell(
+  //     child: Container(
+  //         height: 60,
+  //         width: screenWidth - 110,
+  //         decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(15)), gradient: cached ? ColorsInfo.ColorToGradient(HexColor.fromHex("#586067")) : (modItem.isRewarded ? purpleGradient : yellowGradient)),
+  //         child: Center(
+  //           child: Row(
+  //             mainAxisAlignment: MainAxisAlignment.center,
+  //             children: [
+  //               Text(
+  //                 _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction
+  //                     ? "Next"
+  //                     : cached
+  //                         ? AppLocale.mod_view_downloaded.getString(context)
+  //                         : _phase == ModDetailPhase.pageDownload
+  //                             ? "Downloading" // 👈
+  //                             : _phase == ModDetailPhase.pageFinal
+  //                                 ? "Open mod"
+  //                                 : "Next", // 👈 для pageLoaded
+  //                 // _phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction
+  //                 //     ? "Next"
+  //                 //     : cached
+  //                 //         ? AppLocale.mod_view_downloaded.getString(context)
+  //                 //         : modItem.isRewarded
+  //                 //             ? AppLocale.mod_view_watchads.getString(context)
+  //                 //             : AppLocale.mod_view_install.getString(context),
+  //                 style: TextStyle(
+  //                   color: cached ? HexColor.fromHex("#8D8D8D") : Colors.white,
+  //                   fontSize: 16,
+  //                   fontFamily: "Joystix_Bold",
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         )),
+  //     onTap: () async {
+  //       if (_phase != ModDetailPhase.pageFinal)
+  //       //  if (_phase == ModDetailPhase.description || _phase == ModDetailPhase.instruction)
+  //       {
+  //         // SingleNativeAdLoader().disposeAllAds();
+  //         _nextPhase();
+  //         return;
+  //       }
+
+  //       if (modItem.isPremium) {
+  //         _showLoadingDialog(context);
+  //         paths = await FileManager.downloadAndExtractFile(modItem.downloadURL);
+  //         setState(() {
+  //           cached = true;
+  //         });
+
+  //         if (paths.length == 1) {
+  //           await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+  //           _nextPhase();
+  //         } else {
+  //           if (context.mounted) {
+  //             Navigator.of(context, rootNavigator: true).pop();
+  //             await showModalBottomSheet<void>(
+  //               context: context,
+  //               backgroundColor: ColorsInfo.GetColor(ColorType.Second),
+  //               builder: (BuildContext context) {
+  //                 return SingleChildScrollView(
+  //                   child: Container(
+  //                     height: screenHeight / 3,
+  //                     color: ColorsInfo.GetColor(ColorType.Main),
+  //                     child: Center(
+  //                       child: ListView(
+  //                         children: <Widget>[
+  //                           for (var path in paths)
+  //                             Padding(
+  //                               padding: const EdgeInsets.all(10),
+  //                               child: Container(
+  //                                 color: ColorsInfo.GetColor(ColorType.Second),
+  //                                 width: screenWidth - 50,
+  //                                 height: 50,
+  //                                 child: Row(
+  //                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                                   children: [
+  //                                     Padding(
+  //                                       padding: const EdgeInsets.all(5),
+  //                                       child: SizedBox(
+  //                                         width: screenWidth - 200,
+  //                                         child: Text(
+  //                                           p.basename(path),
+  //                                           style: TextStyle(
+  //                                             fontFamily: 'Joystix',
+  //                                             color: ColorsInfo.IsDark ? Colors.white : Colors.black,
+  //                                           ),
+  //                                         ),
+  //                                       ),
+  //                                     ),
+  //                                     const SizedBox(width: 10),
+  //                                     Padding(
+  //                                       padding: const EdgeInsets.all(5),
+  //                                       child: InkWell(
+  //                                         child: Container(
+  //                                           height: 40,
+  //                                           color: ColorsInfo.GetColor(ColorType.Main),
+  //                                           child: Padding(
+  //                                             padding: const EdgeInsets.all(5),
+  //                                             child: Center(
+  //                                               child: Text(
+  //                                                 AppLocale.mod_view_install.getString(context),
+  //                                                 style: TextStyle(
+  //                                                   fontFamily: 'Joystix',
+  //                                                   color: ColorsInfo.IsDark ? Colors.white : Colors.black,
+  //                                                 ),
+  //                                               ),
+  //                                             ),
+  //                                           ),
+  //                                         ),
+  //                                         onTap: () async {
+  //                                           await FileOpener.openFileWithApp(path, screenWidth, screenHeight, context);
+  //                                         },
+  //                                       ),
+  //                                     ),
+  //                                   ],
+  //                                 ),
+  //                               ),
+  //                             ),
+  //                         ],
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 );
+  //               },
+  //             );
+  //           }
+  //         }
+
+  //         modService!.downloadMod(modItem);
+  //         FileManager.downloadedModsAmount += 1;
+  //         if (FileManager.downloadedModsAmount == 2) {
+  //           if (await InAppReview.instance.isAvailable()) {
+  //             InAppReview.instance.requestReview();
+  //           }
+  //         }
+  //         if (paths.length == 1) {
+  //           Navigator.of(context, rootNavigator: true).pop();
+  //         }
+  //       } else {
+  //         installProhibited = false;
+
+  //         if (modItem.isRewarded) {
+  //           installProhibited = true;
+  //           if (await AdManager.manager!.isRewardedAdReady()) {
+  //             AdManager.rewardedListener = RewardedListener();
+  //             await AdManager.manager!.showRewarded(AdManager.rewardedListener!);
+  //             await waitWhile(() => AdManager.rewardedListener!.adEnded);
+
+  //             if (AdManager.rewardedListener!.rewardGranted) {
+  //               installProhibited = false;
+  //               prefs = await SharedPreferences.getInstance();
+  //               rewardedWatched = prefs!.getStringList("rewardedWatched") ?? List.empty(growable: true);
+  //               rewardedWatched!.add(modItem.getModID());
+  //               await prefs!.setStringList("rewardedWatched", rewardedWatched!);
+  //               setState(() {
+  //                 modItem.isRewarded = false;
+  //               });
+  //               if (modListScreen != null) {
+  //                 modListScreen!.setState(() {
+  //                   modService!.updateModRewarded(modItem);
+  //                 });
+  //               } else if (favoriteListScreen != null) {
+  //                 favoriteListScreen!.setState(() {
+  //                   modService!.updateModRewarded(modItem);
+  //                 });
+  //               }
+  //             } else {
+  //               return;
+  //             }
+  //           } else {
+  //             Future.delayed(const Duration(seconds: 1), () {
+  //               Navigator.of(context, rootNavigator: true).pop();
+  //             });
+  //             if (context.mounted) {
+  //               showDialog<void>(
+  //                 context: context,
+  //                 barrierDismissible: false,
+  //                 builder: (BuildContext context) {
+  //                   return AlertDialog(
+  //                     content: SingleChildScrollView(
+  //                       child: Center(
+  //                         child: Text(
+  //                           AppLocale.mod_view_error_ads.getString(context),
+  //                           style: const TextStyle(fontFamily: "Joystix"),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   );
+  //                 },
+  //               );
+  //             }
+  //             return;
+  //           }
+  //         }
+
+  //         if (!installProhibited) {
+  //           if (context.mounted) _showLoadingDialog(context);
+  //           paths = await FileManager.downloadAndExtractFile(modItem.downloadURL);
+  //           setState(() {
+  //             cached = true;
+  //           });
+  //           await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+  //           _nextPhase();
+
+  //           modService!.downloadMod(modItem);
+  //           FileManager.downloadedModsAmount += 1;
+  //           if (FileManager.downloadedModsAmount == 2) {
+  //             if (await InAppReview.instance.isAvailable()) {
+  //               InAppReview.instance.requestReview();
+  //             }
+  //           }
+  //           if (paths.length == 1) {
+  //             if (context.mounted) Navigator.of(context, rootNavigator: true).pop();
+  //           }
+  //         }
+  //       }
+  //     },
+  //   );
+  // }
 
   void _showLoadingDialog(BuildContext context) {
     showDialog(
