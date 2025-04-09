@@ -19,16 +19,9 @@ import 'SettingsScreenPad.dart';
 enum SelectedCategory { MainMenu, Premium, Favorites, NewMod, Settings }
 
 class SideDrawer {
-  static Widget getDrawer(BuildContext context, double screenWidth,
-      double screenHeight, String version, SelectedCategory category) {
-    final selectedGradient = LinearGradient(
-        colors: [HexColor.fromHex("#5E53F1"), HexColor.fromHex("#5E53F1")],
-        begin: FractionalOffset.centerLeft,
-        end: FractionalOffset.centerRight);
-    final unSelectedGradient = LinearGradient(colors: [
-      ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#353539"),
-      ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#353539")
-    ], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight);
+  static Widget getDrawer(BuildContext context, double screenWidth, double screenHeight, String version, SelectedCategory category) {
+    final selectedGradient = LinearGradient(colors: [HexColor.fromHex("#5E53F1"), HexColor.fromHex("#5E53F1")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight);
+    final unSelectedGradient = LinearGradient(colors: [ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#353539"), ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#353539")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight);
 
     return VisibilityDetector(
         key: const Key('side-drawer'),
@@ -62,12 +55,7 @@ class SideDrawer {
                                   height: 38,
                                   child: ShaderMask(
                                     shaderCallback: (rect) {
-                                      return (category ==
-                                                  SelectedCategory.MainMenu
-                                              ? selectedGradient
-                                              : unSelectedGradient)
-                                          .createShader(Rect.fromLTRB(
-                                              0, 0, rect.width, rect.height));
+                                      return (category == SelectedCategory.MainMenu ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                     },
                                     blendMode: BlendMode.srcATop,
                                     child: Image.asset(
@@ -79,18 +67,10 @@ class SideDrawer {
                                 ),
                                 title: ShaderMask(
                                   shaderCallback: (rect) {
-                                    return (category ==
-                                                SelectedCategory.MainMenu
-                                            ? selectedGradient
-                                            : unSelectedGradient)
-                                        .createShader(Rect.fromLTRB(
-                                            0, 0, rect.width, rect.height));
+                                    return (category == SelectedCategory.MainMenu ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                   },
                                   blendMode: BlendMode.srcATop,
-                                  child: Text(
-                                      AppLocale.main_side_menu
-                                          .getString(context),
-                                      style: const TextStyle(fontSize: 15)),
+                                  child: Text(AppLocale.main_side_menu.getString(context), style: const TextStyle(fontSize: 15)),
                                 ),
                                 // title: Text(AppLocale.main_side_menu.getString(context), style: TextStyle(fontSize: 15)),
                                 onTap: () {
@@ -105,12 +85,7 @@ class SideDrawer {
                                   height: 38,
                                   child: ShaderMask(
                                     shaderCallback: (rect) {
-                                      return (category ==
-                                                  SelectedCategory.Favorites
-                                              ? selectedGradient
-                                              : unSelectedGradient)
-                                          .createShader(Rect.fromLTRB(
-                                              0, 0, rect.width, rect.height));
+                                      return (category == SelectedCategory.Favorites ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                     },
                                     blendMode: BlendMode.srcATop,
                                     child: Image.asset(
@@ -122,35 +97,74 @@ class SideDrawer {
                                 ),
                                 title: ShaderMask(
                                   shaderCallback: (rect) {
-                                    return (category ==
-                                                SelectedCategory.Favorites
-                                            ? selectedGradient
-                                            : unSelectedGradient)
-                                        .createShader(Rect.fromLTRB(
-                                            0, 0, rect.width, rect.height));
+                                    return (category == SelectedCategory.Favorites ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                   },
                                   blendMode: BlendMode.srcATop,
-                                  child: Text(
-                                      AppLocale.main_side_favorites
-                                          .getString(context)
-                                          .toUpperCase(),
-                                      style: const TextStyle(fontSize: 15)),
+                                  child: Text(AppLocale.main_side_favorites.getString(context).toUpperCase(), style: const TextStyle(fontSize: 15)),
                                 ),
                                 onTap: () async {
                                   if (true) {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            FavoritesModListScreen(
-                                          favMods:
-                                              modService!.getFavoriteMods(),
+                                        builder: (context) => FavoritesModListScreen(
+                                          favMods: modService!.getFavoriteMods(),
                                         ),
                                       ),
                                     );
                                   }
                                 },
                               ),
+                              // const SizedBox(height: 10),
+                              // ListTile(
+                              //   contentPadding: const EdgeInsets.all(0),
+                              //   leading: SizedBox(
+                              //     width: 38,
+                              //     height: 38,
+                              //     child: ShaderMask(
+                              //       shaderCallback: (rect) {
+                              //         return (category ==
+                              //                     SelectedCategory.Favorites
+                              //                 ? selectedGradient
+                              //                 : unSelectedGradient)
+                              //             .createShader(Rect.fromLTRB(
+                              //                 0, 0, rect.width, rect.height));
+                              //       },
+                              //       blendMode: BlendMode.srcATop,
+                              //       child: Image.asset(
+                              //         'assets/images/icon_language.png',
+                              //         height: 400,
+                              //         fit: BoxFit.cover,
+                              //       ),
+                              //     ),
+                              //   ),
+                              //   title: ShaderMask(
+                              //     shaderCallback: (rect) {
+                              //       return (category ==
+                              //                   SelectedCategory.Favorites
+                              //               ? selectedGradient
+                              //               : unSelectedGradient)
+                              //           .createShader(Rect.fromLTRB(
+                              //               0, 0, rect.width, rect.height));
+                              //     },
+                              //     blendMode: BlendMode.srcATop,
+                              //     child: Text(
+                              //         AppLocale.settings_language
+                              //             .getString(context)
+                              //             .toUpperCase(),
+                              //         style: const TextStyle(fontSize: 15)),
+                              //   ),
+                              //   onTap: () async {
+                              //     if (true) {
+                              //       Navigator.push(
+                              //         context,
+                              //         MaterialPageRoute(
+                              //             builder: (context) =>
+                              //                 const LanguageScreenPhone()),
+                              //       );
+                              //     }
+                              //   },
+                              // ),
                               const SizedBox(height: 10),
                               ListTile(
                                 contentPadding: const EdgeInsets.all(0),
@@ -159,62 +173,7 @@ class SideDrawer {
                                   height: 38,
                                   child: ShaderMask(
                                     shaderCallback: (rect) {
-                                      return (category ==
-                                                  SelectedCategory.Favorites
-                                              ? selectedGradient
-                                              : unSelectedGradient)
-                                          .createShader(Rect.fromLTRB(
-                                              0, 0, rect.width, rect.height));
-                                    },
-                                    blendMode: BlendMode.srcATop,
-                                    child: Image.asset(
-                                      'assets/images/icon_language.png',
-                                      height: 400,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                title: ShaderMask(
-                                  shaderCallback: (rect) {
-                                    return (category ==
-                                                SelectedCategory.Favorites
-                                            ? selectedGradient
-                                            : unSelectedGradient)
-                                        .createShader(Rect.fromLTRB(
-                                            0, 0, rect.width, rect.height));
-                                  },
-                                  blendMode: BlendMode.srcATop,
-                                  child: Text(
-                                      AppLocale.settings_language
-                                          .getString(context)
-                                          .toUpperCase(),
-                                      style: const TextStyle(fontSize: 15)),
-                                ),
-                                onTap: () async {
-                                  if (true) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const LanguageScreenPhone()),
-                                    );
-                                  }
-                                },
-                              ),
-                              const SizedBox(height: 10),
-                              ListTile(
-                                contentPadding: const EdgeInsets.all(0),
-                                leading: SizedBox(
-                                  width: 38,
-                                  height: 38,
-                                  child: ShaderMask(
-                                    shaderCallback: (rect) {
-                                      return (category ==
-                                                  SelectedCategory.Favorites
-                                              ? selectedGradient
-                                              : unSelectedGradient)
-                                          .createShader(Rect.fromLTRB(
-                                              0, 0, rect.width, rect.height));
+                                      return (category == SelectedCategory.Favorites ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                     },
                                     blendMode: BlendMode.srcATop,
                                     child: Image.asset(
@@ -226,19 +185,10 @@ class SideDrawer {
                                 ),
                                 title: ShaderMask(
                                   shaderCallback: (rect) {
-                                    return (category ==
-                                                SelectedCategory.Favorites
-                                            ? selectedGradient
-                                            : unSelectedGradient)
-                                        .createShader(Rect.fromLTRB(
-                                            0, 0, rect.width, rect.height));
+                                    return (category == SelectedCategory.Favorites ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                   },
                                   blendMode: BlendMode.srcATop,
-                                  child: Text(
-                                      AppLocale.settings_rate_the_app
-                                          .getString(context)
-                                          .toUpperCase(),
-                                      style: const TextStyle(fontSize: 15)),
+                                  child: Text(AppLocale.settings_rate_the_app.getString(context).toUpperCase(), style: const TextStyle(fontSize: 15)),
                                 ),
                                 onTap: () async {
                                   InAppReview.instance.requestReview();
@@ -252,12 +202,7 @@ class SideDrawer {
                                   height: 38,
                                   child: ShaderMask(
                                     shaderCallback: (rect) {
-                                      return (category ==
-                                                  SelectedCategory.Favorites
-                                              ? selectedGradient
-                                              : unSelectedGradient)
-                                          .createShader(Rect.fromLTRB(
-                                              0, 0, rect.width, rect.height));
+                                      return (category == SelectedCategory.Favorites ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                     },
                                     blendMode: BlendMode.srcATop,
                                     child: Image.asset(
@@ -269,24 +214,13 @@ class SideDrawer {
                                 ),
                                 title: ShaderMask(
                                   shaderCallback: (rect) {
-                                    return (category ==
-                                                SelectedCategory.Favorites
-                                            ? selectedGradient
-                                            : unSelectedGradient)
-                                        .createShader(Rect.fromLTRB(
-                                            0, 0, rect.width, rect.height));
+                                    return (category == SelectedCategory.Favorites ? selectedGradient : unSelectedGradient).createShader(Rect.fromLTRB(0, 0, rect.width, rect.height));
                                   },
                                   blendMode: BlendMode.srcATop,
-                                  child: Text(
-                                      AppLocale.premium_view_policy
-                                          .getString(context)
-                                          .toUpperCase(),
-                                      style: const TextStyle(fontSize: 15)),
+                                  child: Text(AppLocale.premium_view_policy.getString(context).toUpperCase(), style: const TextStyle(fontSize: 15)),
                                 ),
                                 onTap: () async {
-                                  OpenURL.openURL(Platform.isIOS
-                                      ? "https://bytecore.studio/privacypolicy"
-                                      : "https://akstudio.site/privacypolicy");
+                                  OpenURL.openURL(Platform.isIOS ? "https://bytecore.studio/privacypolicy" : "https://akstudio.site/privacypolicy");
                                 },
                               ),
                             ],
@@ -301,12 +235,7 @@ class SideDrawer {
                             padding: const EdgeInsets.only(bottom: 30),
                             child: Text(
                               "",
-                              style: TextStyle(
-                                  fontSize: 10,
-                                  color: ColorsInfo.IsDark
-                                      ? Colors.white
-                                      : HexColor.fromHex(
-                                          ColorsInfo.second_dark)),
+                              style: TextStyle(fontSize: 10, color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex(ColorsInfo.second_dark)),
                             ),
                             // child: Text(AppLocale.main_side_version.getString(context) + ": " + version, style: TextStyle(fontSize: 10, color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex(ColorsInfo.second_dark)),),
                           )),
