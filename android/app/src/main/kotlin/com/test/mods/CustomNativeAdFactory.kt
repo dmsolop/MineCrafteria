@@ -21,41 +21,41 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
     override fun createNativeAd(nativeAd: NativeAd, customOptions: MutableMap<String, Any>?): NativeAdView {
         val adView = NativeAdView(context)
 
-        // Determining the height of the CTA button
+        // Опція стилю
         val adStyle = customOptions?.get("adStyle") as? String ?: "grid"
-        val screenWidthDp = context.resources.displayMetrics.widthPixels / context.resources.displayMetrics.density
-        val useLargeCTA = when (adStyle) {
-            "flowPhase" -> true
-            else -> false
-        }
+        val useLargeCTA = adStyle == "flowPhase"
         val ctaHeightDp = if (useLargeCTA) 60f else 40f
         val ctaCornerRadius = if (useLargeCTA) 15f else 10f
         val ctaHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, ctaHeightDp, context.resources.displayMetrics).toInt()
 
-        // Minimum height: MediaView + padding + CTA + container padding
-        val minHeightDp = 120f + 15f + ctaHeightDp + 30f
-        val minHeightPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, minHeightDp, context.resources.displayMetrics).toInt()
-
-        // Main container
-        val container = RelativeLayout(context).apply {
+        // Основний контейнер
+        val container = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
             setBackgroundColor(Color.parseColor("#252525"))
-            setPadding(10.toPx(context), 10.toPx(context), 10.toPx(context), 10.toPx(context))
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT // Адаптивна висота
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
             )
             background = GradientDrawable().apply {
                 cornerRadius = 10f * context.resources.displayMetrics.density
                 setColor(Color.parseColor("#252525"))
             }
+            minimumHeight = minHeightPx
         }
 
-        // MediaContainer 180x120dp
+        // Внутрішній контент з паддінгами
+        val contentWrapper = RelativeLayout(context).apply {
+            layoutParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            )
+            setPadding(10.toPx(context), 10.toPx(context), 10.toPx(context), 10.toPx(context))
+        }
+
+        // MediaView
         val mediaContainer = FrameLayout(context).apply {
             id = View.generateViewId()
-            layoutParams = RelativeLayout.LayoutParams(
-                180.toPx(context), 120.toPx(context)
-            ).apply {
+            layoutParams = RelativeLayout.LayoutParams(180.toPx(context), 120.toPx(context)).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_START)
                 addRule(RelativeLayout.ALIGN_PARENT_TOP)
             }
@@ -69,7 +69,6 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             )
             nativeAd.mediaContent?.let { mediaContent = it }
         }
-
         mediaContainer.addView(mediaView)
 
         // AD Label
@@ -127,28 +126,6 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             addView(scrollableText)
         }
 
-        val callToAction = Button(context).apply {
-            text = nativeAd.callToAction
-            setTextColor(Color.parseColor("#8D8D8D"))
-            textSize = 16f
-            //val baseTypeface = ResourcesCompat.getFont(context, R.font.joystix)
-            //typeface = Typeface.create(baseTypeface, Typeface.BOLD)
-            typeface = Typeface.DEFAULT_BOLD
-            //typeface = Typeface.createFromAsset(context.assets, "fonts/Joystix.ttf")
-            gravity = Gravity.CENTER
-            layoutParams = RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT,
-                ctaHeightPx
-            ).apply {
-                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-                bottomMargin = 15.toPx(context)
-            }
-            background = GradientDrawable().apply {
-                cornerRadius = ctaCornerRadius * context.resources.displayMetrics.density
-                setColor(Color.parseColor("#586067"))
-            }
-        }
-
         val adChoicesView = AdChoicesView(context).apply {
             layoutParams = RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -159,9 +136,33 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
             }
         }
 
-        container.addView(mediaContainer)
-        container.addView(adChoicesView)
-        container.addView(textLayout)
+        contentWrapper.addView(mediaContainer)
+        contentWrapper.addView(adChoicesView)
+        contentWrapper.addView(textLayout)
+
+        // Кнопка CTA поза паддінгами
+        val callToAction = Button(context).apply {
+            text = nativeAd.callToAction
+            setTextColor(Color.parseColor("#8D8D8D"))
+            textSize = 16f
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                ctaHeightPx
+            ).apply {
+                topMargin = 10.toPx(context)
+                bottomMargin = 15.toPx(context)
+                marginStart = if (adStyle == "flowPhase") 0 else 10.toPx(context)
+                marginEnd = if (adStyle == "flowPhase") 0 else 10.toPx(context)
+            }
+            background = GradientDrawable().apply {
+                cornerRadius = ctaCornerRadius * context.resources.displayMetrics.density
+                setColor(Color.parseColor("#586067"))
+            }
+        }
+
+        container.addView(contentWrapper)
         container.addView(callToAction)
 
         adView.mediaView = mediaView
@@ -169,20 +170,16 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
         adView.bodyView = bodyText
         adView.callToActionView = callToAction
         adView.adChoicesView = adChoicesView
-
         adView.setNativeAd(nativeAd)
 
-        mediaView.isClickable = false
-        headline.isClickable = false
-        bodyText.isClickable = false
-        adLabel.isClickable = false
-        scrollableText.isClickable = false
-        textLayout.isClickable = false
-        container.isClickable = false
+        // Захист від випадкового кліку
+        listOf(mediaView, headline, bodyText, adLabel, scrollableText, textLayout, contentWrapper, container).forEach {
+            it.isClickable = false
+        }
 
         adView.addView(container)
-
         return adView
     }
 }
+
 
