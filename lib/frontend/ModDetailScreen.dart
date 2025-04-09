@@ -711,7 +711,11 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
         width: screenWidth - 110,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(15)),
-          gradient: cached ? ColorsInfo.ColorToGradient(HexColor.fromHex("#586067")) : (modItem.isRewarded ? purpleGradient : yellowGradient),
+          gradient: isFinal
+              ? ColorsInfo.ColorToGradient(HexColor.fromHex("#6522F2"))
+              : cached
+                  ? ColorsInfo.ColorToGradient(HexColor.fromHex("#586067"))
+                  : (modItem.isRewarded ? purpleGradient : yellowGradient),
         ),
         child: Center(
           child: Row(
@@ -720,7 +724,7 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
               Text(
                 buttonText,
                 style: TextStyle(
-                  color: cached ? HexColor.fromHex("#8D8D8D") : Colors.white,
+                  color: isFinal ? Colors.white : (cached ? HexColor.fromHex("#8D8D8D") : Colors.white),
                   fontSize: 16,
                   fontFamily: "Joystix_Bold",
                 ),
