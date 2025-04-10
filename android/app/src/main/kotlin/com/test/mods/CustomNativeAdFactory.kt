@@ -40,7 +40,6 @@ class CustomNativeAdFactory(private val context: Context) : NativeAdFactory {
                 cornerRadius = 10f * context.resources.displayMetrics.density
                 setColor(Color.parseColor("#252525"))
             }
-            minimumHeight = minHeightPx
         }
 
         // Внутрішній контент з паддінгами
