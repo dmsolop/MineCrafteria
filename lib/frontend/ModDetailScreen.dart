@@ -935,7 +935,10 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
             setState(() {
               cached = true;
             });
-            await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+            if (_phase == ModDetailPhase.pageFinal && paths.isNotEmpty) {
+              LogService.log('[ModDetailScreen] 🔥 Opening mod on final phase');
+              await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+            }
             _nextPhase();
 
             modService!.downloadMod(modItem);
