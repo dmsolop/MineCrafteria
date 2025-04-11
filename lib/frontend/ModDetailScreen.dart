@@ -757,7 +757,19 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
         }
 
         if (isFinal) {
-          await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+          if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
+            AdManager.interstitialListener = InterstitialListener();
+            await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+            await waitWhile(() => AdManager.interstitialListener!.adEnded);
+          }
+
+          LogService.log('[ModDetailScreen] Opening mod from pageFinal → path=${paths.isNotEmpty ? paths[0] : 'NO PATH'}');
+
+          if (paths.isNotEmpty) {
+            await FileOpener.openFileWithApp(paths[0], screenWidth, screenHeight, context);
+          } else {
+            LogService.log('[ModDetailScreen] paths is empty. Nothing to open.');
+          }
           return;
         }
 
