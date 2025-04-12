@@ -677,7 +677,14 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
       itemBuilder: (context, index) {
         final mod = mods[index];
         return GestureDetector(
-          onTap: () => openModFromCurrentScreen(mod),
+          onTap: () async {
+            final allowEnter = await AdManager.handleRewardedEntry(
+              mod: mod,
+              refreshUI: () => setState(() {}),
+            );
+            if (!allowEnter) return;
+            openModFromCurrentScreen(mod);
+          },
           child: ModItem(modItemData: mod),
         );
       },

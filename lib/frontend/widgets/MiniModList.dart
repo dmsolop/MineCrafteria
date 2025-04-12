@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../backend/AdManager.dart';
+import '../../main.dart';
 import '../ModItemData.dart';
 import 'package:morph_mods/frontend/ModItemMini.dart';
 import 'package:morph_mods/backend/CacheManager.dart';
@@ -94,7 +96,14 @@ class _MiniModListState extends State<MiniModList> {
       child: AspectRatio(
         aspectRatio: aspectRatio,
         child: InkWell(
-          onTap: () {
+          onTap: () async {
+            final mod = modItem;
+            final allowEnter = await AdManager.handleRewardedEntry(
+              mod: mod,
+              refreshUI: () => setState(() {}),
+            );
+            if (!allowEnter) return;
+
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -135,50 +144,4 @@ class _MiniModListState extends State<MiniModList> {
       ),
     );
   }
-
-  // Widget _buildMiniMod(ModItemData modItem) {
-  //   return SizedBox(
-  //     width: MediaQuery.of(context).size.width / 2.2,
-  //     height: 197,
-  //     child: InkWell(
-  //       onTap: () {
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (_) => MediaQuery.of(context).size.width > 700
-  //                 ? ModDetailScreenPadWidget(
-  //                     modItem: modItem,
-  //                     modListScreen: widget.modListScreen,
-  //                     favoritesListScreen: widget.favoriteListScreen,
-  //                     modListIndex: widget.modListIndex,
-  //                   )
-  //                 : ModDetailScreenWidget(
-  //                     modItem: modItem,
-  //                     modListScreen: widget.modListScreen,
-  //                     favoritesListScreen: widget.favoriteListScreen,
-  //                     modListIndex: widget.modListIndex,
-  //                   ),
-  //           ),
-  //         );
-  //       },
-  //       child: VisibilityDetector(
-  //         key: Key(modItem.imageUrl + modItem.isFirestoreChecked.toString()),
-  //         onVisibilityChanged: (visibility) async {
-  //           if (visibility.visibleFraction > 0) {
-  //             bool cached = await CacheManager.isCacheAvailable(modItem.downloadURL);
-  //             if (mounted && modItem.cached != cached) {
-  //               setState(() {
-  //                 modItem.cached = cached;
-  //               });
-  //             }
-  //           }
-  //         },
-  //         child: ModItemMini(
-  //           modItemData: modItem,
-  //           compact: widget.mode == DisplayMode.grid,
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
 }

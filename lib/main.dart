@@ -683,6 +683,13 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                             return SizedBox(
                               child: InkWell(
                                 onTap: () async {
+                                  final mod = modItems[actualIndex];
+                                  final allowEnter = await AdManager.handleRewardedEntry(
+                                    mod: mod,
+                                    refreshUI: () => setState(() {}),
+                                  );
+                                  if (!allowEnter) return;
+
                                   // 🔹 Показ interstitial (без preLoadAd!)
                                   if (AdConfig.isAdsEnabled) {
                                     if (AdManager.nextTimeInterstitial == null || AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
@@ -695,7 +702,6 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                                     }
                                   }
 
-                                  // 🔹 Переходимо після реклами (або одразу)
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -715,47 +721,6 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                                     ),
                                   );
                                 },
-
-                                // onTap: () async {
-                                //   if (AdConfig.isAdsEnabled) {
-                                //     // Interstitial advertising
-                                //     if (AdManager.nextTimeInterstitial == null) {
-                                //       if (await AdManager.manager!.isInterstitialReady()) {
-                                //         AdManager.interstitialListener = InterstitialListener();
-                                //         await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
-                                //         await waitWhile(() => AdManager.interstitialListener!.adEnded);
-                                //         AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
-                                //       }
-                                //     } else if (AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
-                                //       if (await AdManager.manager!.isInterstitialReady()) {
-                                //         AdManager.interstitialListener = InterstitialListener();
-                                //         await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
-                                //         await waitWhile(() => AdManager.interstitialListener!.adEnded);
-                                //         AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
-                                //       }
-                                //     }
-                                //   }
-
-                                //   // Go to the mod details screen
-                                //   Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //       builder: (context) => screenWidth > 700
-                                //           ? ModDetailScreenPadWidget(
-                                //               modItem: modItems[actualIndex],
-                                //               modListScreen: this,
-                                //               favoritesListScreen: null,
-                                //               modListIndex: _activeCategoryIndex,
-                                //             )
-                                //           : ModDetailScreenWidget(
-                                //               modItem: modItems[actualIndex],
-                                //               modListScreen: this,
-                                //               favoritesListScreen: null,
-                                //               modListIndex: _activeCategoryIndex,
-                                //             ),
-                                //     ),
-                                //   );
-                                // },
                                 child: VisibilityDetector(
                                   key: Key(modItems[actualIndex].imageUrl + modItems[actualIndex].isFirestoreChecked.toString()),
                                   onVisibilityChanged: (visibility) async {

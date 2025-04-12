@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:morph_mods/frontend/ColorsInfo.dart';
 
+import '../frontend/ModItemData.dart';
+import '../main.dart';
+
 class AdConfig {
   static bool isAdsEnabled = true;
 }
@@ -29,9 +32,7 @@ class AdManager {
         .withCasId(Platform.isIOS ? "demo" : "demo")
         .withConsentFlow(CAS.buildConsentFlow())
         // List Ad formats used in app
-        .withAdTypes(AdTypeFlags.Banner |
-            AdTypeFlags.Interstitial |
-            AdTypeFlags.Rewarded)
+        .withAdTypes(AdTypeFlags.Banner | AdTypeFlags.Interstitial | AdTypeFlags.Rewarded)
         // Use Test ads or live ads
         .withTestMode(true)
         .initialize();
@@ -81,10 +82,36 @@ class AdManager {
       ],
     );
   }
+
+  static Future<bool> handleRewardedEntry({
+    required ModItemData mod,
+    required VoidCallback refreshUI,
+  }) async {
+    if (!mod.isRewarded) return true;
+
+    if (await manager!.isRewardedAdReady()) {
+      rewardedListener = RewardedListener();
+      await manager!.showRewarded(rewardedListener!);
+      await waitWhile(() => rewardedListener!.adEnded);
+
+      if (rewardedListener!.rewardGranted) {
+        mod.isRewarded = false;
+        modService!.updateModRewarded(mod);
+        refreshUI();
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      mod.isRewarded = false;
+      modService!.updateModRewarded(mod);
+      refreshUI();
+      return true;
+    }
+  }
 }
 
-Future waitWhile(bool Function() test,
-    [Duration pollInterval = Duration.zero]) {
+Future waitWhile(bool Function() test, [Duration pollInterval = Duration.zero]) {
   var completer = Completer();
   check() {
     if (test()) {
