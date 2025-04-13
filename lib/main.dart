@@ -691,16 +691,16 @@ class ModListScreenState extends State<ModListScreen> with SingleTickerProviderS
                                   if (!allowEnter) return;
 
                                   // 🔹 Показ interstitial (без preLoadAd!)
-                                  if (AdConfig.isAdsEnabled) {
-                                    if (AdManager.nextTimeInterstitial == null || AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
-                                      if (await AdManager.manager!.isInterstitialReady()) {
-                                        AdManager.interstitialListener = InterstitialListener();
-                                        await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
-                                        await waitWhile(() => AdManager.interstitialListener!.adEnded);
-                                        // AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
-                                      }
-                                    }
-                                  }
+                                  // if (AdConfig.isAdsEnabled) {
+                                  //   if (AdManager.nextTimeInterstitial == null || AdManager.nextTimeInterstitial!.isBefore(DateTime.now())) {
+                                  //     if (await AdManager.manager!.isInterstitialReady()) {
+                                  //       AdManager.interstitialListener = InterstitialListener();
+                                  //       await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+                                  //       await waitWhile(() => AdManager.interstitialListener!.adEnded);
+                                  //       // AdManager.nextTimeInterstitial = DateTime.now().add(const Duration(seconds: 60));
+                                  //     }
+                                  //   }
+                                  // }
 
                                   Navigator.push(
                                     context,

@@ -626,11 +626,11 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
     const itemHeight = 215.0;
 
     void openModFromCurrentScreen(ModItemData newModItem) async {
-      if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
-        AdManager.interstitialListener = InterstitialListener();
-        await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
-        await waitWhile(() => AdManager.interstitialListener!.adEnded);
-      }
+      // if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
+      //   AdManager.interstitialListener = InterstitialListener();
+      //   await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+      //   await waitWhile(() => AdManager.interstitialListener!.adEnded);
+      // }
 
       if (!mounted) return;
 
