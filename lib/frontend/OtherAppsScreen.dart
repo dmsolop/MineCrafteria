@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:morph_mods/backend/AdManager.dart';
+import 'package:minecrafteria/backend/AdManager.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'AppLocale.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:morph_mods/extensions/color_extension.dart';
+import 'package:minecrafteria/extensions/color_extension.dart';
 import 'ColorsInfo.dart';
 
 class OtherAppsScreen extends StatefulWidget {
@@ -20,31 +20,17 @@ class AppInfo {
   String iosDownloadUrl;
   String androidDownloadUrl;
 
-  AppInfo(
-      this.name, this.iconName, this.iosDownloadUrl, this.androidDownloadUrl);
+  AppInfo(this.name, this.iconName, this.iosDownloadUrl, this.androidDownloadUrl);
 }
 
 class _OtherAppsScreenState extends State<OtherAppsScreen> {
   final PageController _pageController = PageController();
 
   List<AppInfo> apps = [
-    AppInfo("Addons & Mods for Minecraft PE", "addons-mcpe.png", "",
-        "https://play.google.com/store/apps/details?id=com.addons.mods.minecraft.pe"),
-    AppInfo(
-        "Idle Restaurant Simulator",
-        "idle-restaurant.png",
-        "https://apps.apple.com/us/app/idle-restaurant-simulator/id6476298208",
-        "https://play.google.com/store/apps/details?id=com.idle.restaurant.simulator.clicker.tycoon.games"),
-    AppInfo(
-        "House Mods for Minecraft PE",
-        "mcpe-houses.png",
-        "https://apps.apple.com/us/app/house-mods-for-minecraft-pe/id6584520426",
-        "https://play.google.com/store/apps/details?id=com.house.mods.minecraft.pe"),
-    AppInfo(
-        "Furniture for Minecraft PE",
-        "mcpe-furniture.png",
-        "https://apps.apple.com/app/furniture-for-mcpe/id6648777412",
-        "https://play.google.com/store/apps/details?id=com.furniture.mod.minecraft.pe"),
+    AppInfo("Addons & Mods for Minecraft PE", "addons-mcpe.png", "", "https://play.google.com/store/apps/details?id=com.addons.mods.minecraft.pe"),
+    AppInfo("Idle Restaurant Simulator", "idle-restaurant.png", "https://apps.apple.com/us/app/idle-restaurant-simulator/id6476298208", "https://play.google.com/store/apps/details?id=com.idle.restaurant.simulator.clicker.tycoon.games"),
+    AppInfo("House Mods for Minecraft PE", "mcpe-houses.png", "https://apps.apple.com/us/app/house-mods-for-minecraft-pe/id6584520426", "https://play.google.com/store/apps/details?id=com.house.mods.minecraft.pe"),
+    AppInfo("Furniture for Minecraft PE", "mcpe-furniture.png", "https://apps.apple.com/app/furniture-for-mcpe/id6648777412", "https://play.google.com/store/apps/details?id=com.furniture.mod.minecraft.pe"),
   ];
 
   @override
@@ -63,8 +49,7 @@ class _OtherAppsScreenState extends State<OtherAppsScreen> {
 
     // Filter the apps to include only those with valid URLs
     List<AppInfo> validApps = apps.where((app) {
-      return (Platform.isAndroid && app.androidDownloadUrl.isNotEmpty) ||
-          (Platform.isIOS && app.iosDownloadUrl.isNotEmpty);
+      return (Platform.isAndroid && app.androidDownloadUrl.isNotEmpty) || (Platform.isIOS && app.iosDownloadUrl.isNotEmpty);
     }).toList();
 
     return Scaffold(
@@ -79,10 +64,7 @@ class _OtherAppsScreenState extends State<OtherAppsScreen> {
         backgroundColor: ColorsInfo.GetColor(ColorType.Main),
         title: Text(
           AppLocale.main_side_other_apps.getString(context),
-          style: TextStyle(
-              color: ColorsInfo.IsDark
-                  ? Colors.white
-                  : HexColor.fromHex(ColorsInfo.main_dark)),
+          style: TextStyle(color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex(ColorsInfo.main_dark)),
         ),
       ),
       body: Padding(
@@ -101,14 +83,10 @@ class _OtherAppsScreenState extends State<OtherAppsScreen> {
                   itemCount: validApps.length,
                   itemBuilder: (context, index) {
                     var app = validApps[index];
-                    return (Platform.isAndroid &&
-                                app.androidDownloadUrl != "") ||
-                            (Platform.isIOS && app.iosDownloadUrl != "")
+                    return (Platform.isAndroid && app.androidDownloadUrl != "") || (Platform.isIOS && app.iosDownloadUrl != "")
                         ? InkWell(
                             onTap: () {
-                              launchUrlString(Platform.isIOS
-                                  ? app.iosDownloadUrl
-                                  : app.androidDownloadUrl);
+                              launchUrlString(Platform.isIOS ? app.iosDownloadUrl : app.androidDownloadUrl);
                             },
                             child: Card(
                               color: ColorsInfo.GetColor(ColorType.Main),
@@ -121,32 +99,20 @@ class _OtherAppsScreenState extends State<OtherAppsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 10, top: 10, bottom: 10),
-                                    child: Image.asset(
-                                        "assets/images/${app.iconName}",
-                                        width: 165,
-                                        height: 165,
-                                        fit: BoxFit.cover),
+                                    padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                                    child: Image.asset("assets/images/${app.iconName}", width: 165, height: 165, fit: BoxFit.cover),
                                   ),
                                   SizedBox(
                                     width: 370,
                                     child: Padding(
                                       padding: const EdgeInsets.all(18.0),
                                       child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             app.name,
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                color: ColorsInfo.IsDark
-                                                    ? Colors.white
-                                                    : Colors.black),
+                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: ColorsInfo.IsDark ? Colors.white : Colors.black),
                                             maxLines: 3,
                                           ),
                                         ],
@@ -164,16 +130,12 @@ class _OtherAppsScreenState extends State<OtherAppsScreen> {
                   itemCount: apps.length,
                   itemBuilder: (context, index) {
                     var app = apps[index];
-                    return (Platform.isAndroid &&
-                                app.androidDownloadUrl != "") ||
-                            (Platform.isIOS && app.iosDownloadUrl != "")
+                    return (Platform.isAndroid && app.androidDownloadUrl != "") || (Platform.isIOS && app.iosDownloadUrl != "")
                         ? Padding(
                             padding: const EdgeInsets.only(bottom: 10),
                             child: InkWell(
                                 onTap: () {
-                                  launchUrlString(Platform.isIOS
-                                      ? app.iosDownloadUrl
-                                      : app.androidDownloadUrl);
+                                  launchUrlString(Platform.isIOS ? app.iosDownloadUrl : app.androidDownloadUrl);
                                 },
                                 child: Card(
                                   color: ColorsInfo.GetColor(ColorType.Main),
@@ -182,34 +144,22 @@ class _OtherAppsScreenState extends State<OtherAppsScreen> {
                                   ),
                                   elevation: 0,
                                   child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10, top: 10, bottom: 10),
-                                        child: Image.asset(
-                                            "assets/images/${app.iconName}",
-                                            width: 100,
-                                            height: 100,
-                                            fit: BoxFit.cover),
+                                        padding: const EdgeInsets.only(left: 10, top: 10, bottom: 10),
+                                        child: Image.asset("assets/images/${app.iconName}", width: 100, height: 100, fit: BoxFit.cover),
                                       ),
                                       SizedBox(
                                         width: 240,
                                         child: Padding(
                                           padding: const EdgeInsets.all(18.0),
                                           child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
                                               Text(
                                                 app.name,
-                                                style: TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: ColorsInfo.IsDark
-                                                        ? Colors.white
-                                                        : Colors.black),
+                                                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: ColorsInfo.IsDark ? Colors.white : Colors.black),
                                                 maxLines: 2,
                                               ),
                                             ],

@@ -1,4 +1,4 @@
-package com.test.mods
+package com.minecrafteria.mods
 
 import android.content.Context
 import android.graphics.Color

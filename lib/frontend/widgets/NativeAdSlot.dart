@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:morph_mods/backend/native_ads/SingleNativeAdLoader.dart';
+import 'package:minecrafteria/backend/native_ads/SingleNativeAdLoader.dart';
 import '../../backend/LogService.dart';
 
 class NativeAdSlot extends StatefulWidget {

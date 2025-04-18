@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:morph_mods/backend/AdManager.dart';
+import 'package:minecrafteria/backend/AdManager.dart';
 import 'AppLocale.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:morph_mods/extensions/color_extension.dart';
+import 'package:minecrafteria/extensions/color_extension.dart';
 import 'ColorsInfo.dart';
 
 class InstructionScreen extends StatelessWidget {
@@ -25,11 +25,7 @@ class InstructionScreen extends StatelessWidget {
         backgroundColor: ColorsInfo.GetColor(ColorType.Main),
         title: Text(
           AppLocale.settings_instruction.getString(context),
-          style: TextStyle(
-              color: ColorsInfo.IsDark
-                  ? Colors.white
-                  : HexColor.fromHex(ColorsInfo.main_dark),
-              fontFamily: "Joystix_Bold"),
+          style: TextStyle(color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex(ColorsInfo.main_dark), fontFamily: "Joystix_Bold"),
         ),
       ),
       body: Padding(
@@ -47,14 +43,8 @@ class InstructionScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(AppLocale.instruction_title_1.getString(context),
-                        style: TextStyle(
-                            color: HexColor.fromHex("#8E8E8E"), fontSize: 16),
-                        textAlign: TextAlign.start),
-                    Text(AppLocale.instruction_desc_1.getString(context),
-                        style: TextStyle(
-                            color: HexColor.fromHex("#8E8E8E"), fontSize: 10),
-                        textAlign: TextAlign.start),
+                    Text(AppLocale.instruction_title_1.getString(context), style: TextStyle(color: HexColor.fromHex("#8E8E8E"), fontSize: 16), textAlign: TextAlign.start),
+                    Text(AppLocale.instruction_desc_1.getString(context), style: TextStyle(color: HexColor.fromHex("#8E8E8E"), fontSize: 10), textAlign: TextAlign.start),
                     const SizedBox(
                       height: 20,
                     ),

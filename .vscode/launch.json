@@ -5,18 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "morph_mods",
+            "name": "minecrafteria",
             "request": "launch",
             "type": "dart",
         },
         {
-            "name": "morph_mods (profile mode)",
+            "name": "minecrafteria (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "morph_mods (release mode)",
+            "name": "minecrafteria (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

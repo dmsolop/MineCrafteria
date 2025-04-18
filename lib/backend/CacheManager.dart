@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:morph_mods/backend/FileOpener.dart';
+import 'package:minecrafteria/backend/FileOpener.dart';
 import 'package:path/path.dart' as path;
 
 class CacheManager {
@@ -14,8 +14,7 @@ class CacheManager {
     if (await cacheFile.exists()) {
       final content = await cacheFile.readAsString();
       final Map<String, dynamic> jsonContent = jsonDecode(content);
-      return jsonContent
-          .map((key, value) => MapEntry(key, List<String>.from(value)));
+      return jsonContent.map((key, value) => MapEntry(key, List<String>.from(value)));
     }
     return {};
   }

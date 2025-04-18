@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:morph_mods/backend/AdManager.dart';
-import 'package:morph_mods/extensions/color_extension.dart';
+import 'package:minecrafteria/backend/AdManager.dart';
+import 'package:minecrafteria/extensions/color_extension.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:morph_mods/main.dart';
+import 'package:minecrafteria/main.dart';
 import 'AppLocale.dart';
 import 'ModItem.dart';
 import 'GradientElevatedButton.dart';
@@ -17,8 +17,7 @@ class FavoritesModListScreen extends StatefulWidget {
   const FavoritesModListScreen({super.key, required this.favMods});
 
   @override
-  FavoritesModListScreenState createState() =>
-      FavoritesModListScreenState(favMods: favMods);
+  FavoritesModListScreenState createState() => FavoritesModListScreenState(favMods: favMods);
 }
 
 List<List<ModItemData>> searchedMods = List.empty();
@@ -74,19 +73,14 @@ class FavoritesModListScreenState extends State<FavoritesModListScreen> {
         centerTitle: true,
         title: Text(
           AppLocale.favorites_title.getString(context),
-          style: TextStyle(
-              color: ColorsInfo.IsDark
-                  ? Colors.white
-                  : HexColor.fromHex(ColorsInfo.main_dark),
-              fontFamily: "Joystix_Bold"),
+          style: TextStyle(color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex(ColorsInfo.main_dark), fontFamily: "Joystix_Bold"),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(100.0),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                    left: 13, right: 13, top: 8, bottom: 10),
+                padding: const EdgeInsets.only(left: 13, right: 13, top: 8, bottom: 10),
                 child: SizedBox(
                   height: 40,
                   child: TextField(
@@ -106,17 +100,14 @@ class FavoritesModListScreenState extends State<FavoritesModListScreen> {
                           padding: const EdgeInsets.all(5),
                           child: Image.asset('assets/images/search_icon.png'),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 7),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 7),
                         fillColor: ColorsInfo.GetColor(ColorType.Second),
                         filled: true,
-                        hintStyle:
-                            TextStyle(color: HexColor.fromHex("#8D8D8D"))),
+                        hintStyle: TextStyle(color: HexColor.fromHex("#8D8D8D"))),
                     onSubmitted: (value) => {
                       setState(() {
                         searchText = value;
-                        searchedMods = modService!
-                            .searchModsSpecificList(favMods, searchText);
+                        searchedMods = modService!.searchModsSpecificList(favMods, searchText);
                       })
                     },
                   ),
@@ -147,20 +138,8 @@ class FavoritesModListScreenState extends State<FavoritesModListScreen> {
                             });
                           },
                           gradient: _activeCategoryIndex == index
-                              ? LinearGradient(
-                                  colors: [
-                                      HexColor.fromHex("#5E53F1"),
-                                      HexColor.fromHex("#5E53F1")
-                                    ],
-                                  begin: FractionalOffset.centerLeft,
-                                  end: FractionalOffset.centerRight)
-                              : LinearGradient(
-                                  colors: [
-                                      ColorsInfo.GetColor(ColorType.Second),
-                                      ColorsInfo.GetColor(ColorType.Second)
-                                    ],
-                                  begin: FractionalOffset.centerLeft,
-                                  end: FractionalOffset.centerRight),
+                              ? LinearGradient(colors: [HexColor.fromHex("#5E53F1"), HexColor.fromHex("#5E53F1")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight)
+                              : LinearGradient(colors: [ColorsInfo.GetColor(ColorType.Second), ColorsInfo.GetColor(ColorType.Second)], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight),
                           child: Row(
                             children: [
                               SizedBox(
@@ -172,13 +151,7 @@ class FavoritesModListScreenState extends State<FavoritesModListScreen> {
                                       image: _categoryIcons[index].image,
                                       fit: BoxFit.cover,
                                       colorFilter: ColorFilter.mode(
-                                        (_activeCategoryIndex == index
-                                                ? Colors.white
-                                                : (ColorsInfo.IsDark
-                                                    ? Colors.white
-                                                    : HexColor.fromHex(
-                                                        "#8E8E8E")))
-                                            .withOpacity(1),
+                                        (_activeCategoryIndex == index ? Colors.white : (ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#8E8E8E"))).withOpacity(1),
                                         BlendMode.srcATop,
                                       ),
                                     ),
@@ -189,15 +162,10 @@ class FavoritesModListScreenState extends State<FavoritesModListScreen> {
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
                                   child: Text(
-                                    AppLocale.categoryIndexToString(
-                                        index == 0 ? 0 : index + 2, context),
+                                    AppLocale.categoryIndexToString(index == 0 ? 0 : index + 2, context),
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: _activeCategoryIndex == index
-                                          ? Colors.white
-                                          : (ColorsInfo.IsDark
-                                              ? Colors.white
-                                              : HexColor.fromHex("#8E8E8E")),
+                                      color: _activeCategoryIndex == index ? Colors.white : (ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#8E8E8E")),
                                       fontFamily: "Joystix_Bold",
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -231,8 +199,7 @@ class FavoritesModListScreenState extends State<FavoritesModListScreen> {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return GridView.builder(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: 8,

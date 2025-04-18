@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:morph_mods/backend/AccessKeys.dart';
-import 'package:morph_mods/backend/FileOpener.dart';
-import 'package:morph_mods/frontend/CacheClearDialog.dart';
-import 'package:morph_mods/frontend/LoadingDialog.dart';
+import 'package:minecrafteria/backend/AccessKeys.dart';
+import 'package:minecrafteria/backend/FileOpener.dart';
+import 'package:minecrafteria/frontend/CacheClearDialog.dart';
+import 'package:minecrafteria/frontend/LoadingDialog.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:archive/archive.dart';
@@ -50,10 +50,7 @@ class FileManager {
     // Step 1: Download the file
     http.Response? response;
     try {
-      response = await http.get(Uri.parse(url), headers: {
-        "CF-Access-Client-Secret": AccessKeys.client_secret,
-        "CF-Access-Client-Id": AccessKeys.client_id
-      });
+      response = await http.get(Uri.parse(url), headers: {"CF-Access-Client-Secret": AccessKeys.client_secret, "CF-Access-Client-Id": AccessKeys.client_id});
     } catch (e) {
       if (response?.statusCode != 200) {
         return [];
@@ -89,15 +86,13 @@ class FileManager {
     if (await cacheFile.exists()) {
       final content = await cacheFile.readAsString();
       final Map<String, dynamic> jsonContent = jsonDecode(content);
-      return jsonContent
-          .map((key, value) => MapEntry(key, List<String>.from(value)));
+      return jsonContent.map((key, value) => MapEntry(key, List<String>.from(value)));
     }
     return {};
   }
 
   /// Update the cache file with new data
-  static Future<void> _updateCache(
-      File cacheFile, Map<String, List<String>> cache) async {
+  static Future<void> _updateCache(File cacheFile, Map<String, List<String>> cache) async {
     final jsonContent = jsonEncode(cache);
     await cacheFile.writeAsString(jsonContent);
   }

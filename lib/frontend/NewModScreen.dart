@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:morph_mods/backend/AdManager.dart';
-import 'package:morph_mods/frontend/GradientElevatedButton.dart';
+import 'package:minecrafteria/backend/AdManager.dart';
+import 'package:minecrafteria/frontend/GradientElevatedButton.dart';
 import 'AppLocale.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:morph_mods/extensions/color_extension.dart';
+import 'package:minecrafteria/extensions/color_extension.dart';
 import 'ColorsInfo.dart';
 
 class NewModScreen extends StatefulWidget {
@@ -60,20 +60,8 @@ class _NewModScreenState extends State<NewModScreen> {
             });
           },
           gradient: _activeCategoryIndex == index
-              ? LinearGradient(
-                  colors: [
-                      HexColor.fromHex("#5092F0"),
-                      HexColor.fromHex("#636CE1")
-                    ],
-                  begin: FractionalOffset.centerLeft,
-                  end: FractionalOffset.centerRight)
-              : LinearGradient(
-                  colors: [
-                      ColorsInfo.GetColor(ColorType.Second),
-                      ColorsInfo.GetColor(ColorType.Second)
-                    ],
-                  begin: FractionalOffset.centerLeft,
-                  end: FractionalOffset.centerRight),
+              ? LinearGradient(colors: [HexColor.fromHex("#5092F0"), HexColor.fromHex("#636CE1")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight)
+              : LinearGradient(colors: [ColorsInfo.GetColor(ColorType.Second), ColorsInfo.GetColor(ColorType.Second)], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight),
           child: Row(
             children: [
               SizedBox(
@@ -85,12 +73,7 @@ class _NewModScreenState extends State<NewModScreen> {
                       image: _categoryIcons[index].image,
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
-                        (_activeCategoryIndex == index
-                                ? Colors.white
-                                : (ColorsInfo.IsDark
-                                    ? Colors.white
-                                    : HexColor.fromHex("#8E8E8E")))
-                            .withOpacity(1),
+                        (_activeCategoryIndex == index ? Colors.white : (ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#8E8E8E"))).withOpacity(1),
                         BlendMode.srcATop,
                       ),
                     ),
@@ -102,13 +85,7 @@ class _NewModScreenState extends State<NewModScreen> {
                   fit: BoxFit.scaleDown,
                   child: Text(
                     AppLocale.categoryIndexToString(nameIndex, context),
-                    style: TextStyle(
-                        fontSize: 10,
-                        color: _activeCategoryIndex == index
-                            ? Colors.white
-                            : (ColorsInfo.IsDark
-                                ? Colors.white
-                                : HexColor.fromHex("#8E8E8E"))),
+                    style: TextStyle(fontSize: 10, color: _activeCategoryIndex == index ? Colors.white : (ColorsInfo.IsDark ? Colors.white : HexColor.fromHex("#8E8E8E"))),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -126,8 +103,7 @@ class _NewModScreenState extends State<NewModScreen> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor:
-          ColorsInfo.IsDark ? HexColor.fromHex("#262626") : Colors.white,
+      backgroundColor: ColorsInfo.IsDark ? HexColor.fromHex("#262626") : Colors.white,
       bottomNavigationBar: AdManager.getBottomBannerBackground(context),
       appBar: AppBar(
         leading: IconButton(
@@ -137,10 +113,7 @@ class _NewModScreenState extends State<NewModScreen> {
         centerTitle: true,
         title: Text(
           AppLocale.new_mod_title.getString(context),
-          style: TextStyle(
-              color: ColorsInfo.IsDark
-                  ? Colors.white
-                  : HexColor.fromHex(ColorsInfo.main_dark)),
+          style: TextStyle(color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex(ColorsInfo.main_dark)),
         ),
         backgroundColor: ColorsInfo.GetColor(ColorType.Main),
       ),
@@ -153,15 +126,7 @@ class _NewModScreenState extends State<NewModScreen> {
               height: screenHeight / 1.5,
               decoration: BoxDecoration(
                   image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: Image.asset(screenWidth > 700
-                              ? (ColorsInfo.IsDark
-                                  ? 'assets/images/new_mod_screen_ipad_dark.png'
-                                  : 'assets/images/new_mod_screen_ipad.png')
-                              : (ColorsInfo.IsDark
-                                  ? 'assets/images/new_mod_screen_dark.png'
-                                  : 'assets/images/new_mod_screen.png'))
-                          .image)),
+                      fit: BoxFit.fill, image: Image.asset(screenWidth > 700 ? (ColorsInfo.IsDark ? 'assets/images/new_mod_screen_ipad_dark.png' : 'assets/images/new_mod_screen_ipad.png') : (ColorsInfo.IsDark ? 'assets/images/new_mod_screen_dark.png' : 'assets/images/new_mod_screen.png')).image)),
             ),
             Container(
               alignment: Alignment.center,
@@ -190,16 +155,10 @@ class _NewModScreenState extends State<NewModScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(maxWidth: 900),
+                                  constraints: const BoxConstraints(maxWidth: 900),
                                   child: Text(
-                                    AppLocale.new_mod_subtitle1
-                                        .getString(context),
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: ColorsInfo.IsDark
-                                            ? Colors.white
-                                            : Colors.black),
+                                    AppLocale.new_mod_subtitle1.getString(context),
+                                    style: TextStyle(fontSize: 16, color: ColorsInfo.IsDark ? Colors.white : Colors.black),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -210,38 +169,24 @@ class _NewModScreenState extends State<NewModScreen> {
                                   controller: textNameController,
                                   textAlign: TextAlign.start,
                                   textAlignVertical: TextAlignVertical.top,
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 12),
+                                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                                   decoration: InputDecoration(
                                       filled: true,
                                       contentPadding: const EdgeInsets.all(15),
-                                      fillColor:
-                                          ColorsInfo.GetColor(ColorType.Second),
-                                      hintStyle: const TextStyle(
-                                          color: Colors.grey, fontSize: 12),
-                                      labelStyle: const TextStyle(
-                                          color: Colors.grey, fontSize: 12),
-                                      border: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.zero,
-                                          borderSide: BorderSide.none,
-                                          gapPadding: 0),
-                                      hintText: AppLocale.new_mod_hint1
-                                          .getString(context)),
+                                      fillColor: ColorsInfo.GetColor(ColorType.Second),
+                                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                                      labelStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                                      border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide.none, gapPadding: 0),
+                                      hintText: AppLocale.new_mod_hint1.getString(context)),
                                 ),
                                 const SizedBox(
                                   height: 20,
                                 ),
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(maxWidth: 900),
+                                  constraints: const BoxConstraints(maxWidth: 900),
                                   child: Text(
-                                    AppLocale.new_mod_subtitle2
-                                        .getString(context),
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        color: ColorsInfo.IsDark
-                                            ? Colors.white
-                                            : Colors.black),
+                                    AppLocale.new_mod_subtitle2.getString(context),
+                                    style: TextStyle(fontSize: 16, color: ColorsInfo.IsDark ? Colors.white : Colors.black),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -257,24 +202,15 @@ class _NewModScreenState extends State<NewModScreen> {
                                     expands: true,
                                     minLines: null,
                                     maxLines: null,
-                                    style: const TextStyle(
-                                        color: Colors.grey, fontSize: 12),
+                                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                                     decoration: InputDecoration(
                                         filled: true,
-                                        contentPadding:
-                                            const EdgeInsets.all(15),
-                                        fillColor: ColorsInfo.GetColor(
-                                            ColorType.Second),
-                                        hintStyle: const TextStyle(
-                                            color: Colors.grey, fontSize: 12),
-                                        labelStyle: const TextStyle(
-                                            color: Colors.grey, fontSize: 12),
-                                        border: const OutlineInputBorder(
-                                            borderRadius: BorderRadius.zero,
-                                            borderSide: BorderSide.none,
-                                            gapPadding: 0),
-                                        hintText: AppLocale.new_mod_hint2
-                                            .getString(context)),
+                                        contentPadding: const EdgeInsets.all(15),
+                                        fillColor: ColorsInfo.GetColor(ColorType.Second),
+                                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        labelStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide.none, gapPadding: 0),
+                                        hintText: AppLocale.new_mod_hint2.getString(context)),
                                   ),
                                 ),
                                 const SizedBox(
@@ -282,8 +218,7 @@ class _NewModScreenState extends State<NewModScreen> {
                                 ),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     GetCategoryButton(0, 4),
                                     const SizedBox(
@@ -297,8 +232,7 @@ class _NewModScreenState extends State<NewModScreen> {
                                 ),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     GetCategoryButton(2, 2),
                                     const SizedBox(
@@ -323,20 +257,12 @@ class _NewModScreenState extends State<NewModScreen> {
                       child: Container(
                           height: 57,
                           constraints: const BoxConstraints(maxWidth: 500),
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                  colors: [
-                                HexColor.fromHex("#5092F0"),
-                                HexColor.fromHex("#636CE1")
-                              ],
-                                  begin: FractionalOffset.centerLeft,
-                                  end: FractionalOffset.centerRight)),
+                          decoration: BoxDecoration(gradient: LinearGradient(colors: [HexColor.fromHex("#5092F0"), HexColor.fromHex("#636CE1")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight)),
                           // color: HexColor.fromHex("#353539"),
                           child: Center(
                             child: Text(
                               AppLocale.new_mod_button.getString(context),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 15),
+                              style: const TextStyle(color: Colors.white, fontSize: 15),
                             ),
                           )),
                     ),

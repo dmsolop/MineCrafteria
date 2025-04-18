@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Volumes/SSD/dmytro meedlight/morph_mods/android/app/.cxx/RelWithDebInfo/6n1z3z6y/x86_64/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Volumes/SSD/dmytro meedlight/minecrafteria/android/app/.cxx/RelWithDebInfo/6n1z3z6y/x86_64/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

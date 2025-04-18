@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:morph_mods/backend/native_ads/NativeAdManager.dart';
+import 'package:minecrafteria/backend/native_ads/NativeAdManager.dart';
 import '../AdManager.dart';
 import '../../backend/LogService.dart';
 

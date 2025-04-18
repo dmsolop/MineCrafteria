@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:morph_mods/backend/AccessKeys.dart';
+import 'package:minecrafteria/backend/AccessKeys.dart';
 import 'ColorsInfo.dart';
 import 'ModItemData.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';

@@ -1,18 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:morph_mods/backend/AdManager.dart';
-import 'package:morph_mods/backend/OpenURL.dart';
-import 'package:morph_mods/frontend/LanguageScreenPhone.dart';
-import 'package:morph_mods/frontend/OtherAppsScreen.dart';
-import 'package:morph_mods/main.dart';
+import 'package:minecrafteria/backend/AdManager.dart';
+import 'package:minecrafteria/backend/OpenURL.dart';
+import 'package:minecrafteria/frontend/LanguageScreenPhone.dart';
+import 'package:minecrafteria/frontend/OtherAppsScreen.dart';
+import 'package:minecrafteria/main.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'AppLocale.dart';
 import 'ColorsInfo.dart';
 import 'FavoritesScreen.dart';
 import 'NewModScreen.dart';
 import 'SettingsScreen.dart';
-import 'package:morph_mods/extensions/color_extension.dart';
+import 'package:minecrafteria/extensions/color_extension.dart';
 import 'package:flutter_localization/flutter_localization.dart';
 import 'SettingsScreenPad.dart';
 

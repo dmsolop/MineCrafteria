@@ -1,1 +1,1 @@
-/Volumes/SSD/dmytro meedlight/morph_mods/build/app/intermediates/cxx/RelWithDebInfo/6n1z3z6y/obj/x86_64
+/Volumes/SSD/dmytro meedlight/minecrafteria/build/app/intermediates/cxx/RelWithDebInfo/6n1z3z6y/obj/x86_64

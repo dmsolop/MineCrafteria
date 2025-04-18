@@ -1,4 +1,4 @@
-package com.test.mods
+package com.minecrafteria.mods
 
 import java.io.File
 import android.content.Intent
@@ -7,7 +7,8 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.googlemobileads.GoogleMobileAdsPlugin
-import com.test.mods.CustomNativeAdFactory
+import com.minecrafteria.mods.CustomNativeAdFactory
+import com.minecrafteria.mods.BuildConfig
 
 
 class MainActivity : FlutterActivity() {

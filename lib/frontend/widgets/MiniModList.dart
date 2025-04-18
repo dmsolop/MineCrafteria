@@ -5,10 +5,10 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../backend/AdManager.dart';
 import '../../main.dart';
 import '../ModItemData.dart';
-import 'package:morph_mods/frontend/ModItemMini.dart';
-import 'package:morph_mods/backend/CacheManager.dart';
-import 'package:morph_mods/frontend/ModDetailScreen.dart';
-import 'package:morph_mods/frontend/ModDetailScreenPad.dart';
+import 'package:minecrafteria/frontend/ModItemMini.dart';
+import 'package:minecrafteria/backend/CacheManager.dart';
+import 'package:minecrafteria/frontend/ModDetailScreen.dart';
+import 'package:minecrafteria/frontend/ModDetailScreenPad.dart';
 import '../../backend/LogService.dart';
 
 enum DisplayMode {

@@ -1,2 +1,2 @@
-/Volumes/SSD/dmytro meedlight/morph_mods/android/app/.cxx/Debug/5z4sl5o2/x86/CMakeFiles/edit_cache.dir
-/Volumes/SSD/dmytro meedlight/morph_mods/android/app/.cxx/Debug/5z4sl5o2/x86/CMakeFiles/rebuild_cache.dir
+/Volumes/SSD/dmytro meedlight/minecrafteria/android/app/.cxx/Debug/5z4sl5o2/x86/CMakeFiles/edit_cache.dir
+/Volumes/SSD/dmytro meedlight/minecrafteria/android/app/.cxx/Debug/5z4sl5o2/x86/CMakeFiles/rebuild_cache.dir

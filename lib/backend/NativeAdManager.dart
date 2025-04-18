@@ -1,7 +1,7 @@
 // import 'package:flutter/material.dart';
 // import 'package:google_mobile_ads/google_mobile_ads.dart';
-// import 'package:morph_mods/backend/AccessKeys.dart';
-// import 'package:morph_mods/backend/AdManager.dart';
+// import 'package:minecrafteria/backend/AccessKeys.dart';
+// import 'package:minecrafteria/backend/AdManager.dart';
 
 // class NativeAdManager {
 //   static const String _adUnitId = AccessKeys.adUnitId;

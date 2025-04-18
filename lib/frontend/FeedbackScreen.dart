@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:morph_mods/backend/AdManager.dart';
+import 'package:minecrafteria/backend/AdManager.dart';
 import 'AppLocale.dart';
 import 'package:flutter_localization/flutter_localization.dart';
-import 'package:morph_mods/extensions/color_extension.dart';
+import 'package:minecrafteria/extensions/color_extension.dart';
 import 'ColorsInfo.dart';
 
 class FeedbackScreen extends StatefulWidget {
@@ -31,8 +31,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor:
-          ColorsInfo.IsDark ? HexColor.fromHex("#262626") : Colors.white,
+      backgroundColor: ColorsInfo.IsDark ? HexColor.fromHex("#262626") : Colors.white,
       bottomNavigationBar: AdManager.getBottomBannerBackground(context),
       appBar: AppBar(
         leading: IconButton(
@@ -42,10 +41,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         centerTitle: true,
         title: Text(
           AppLocale.feedback_title.getString(context),
-          style: TextStyle(
-              color: ColorsInfo.IsDark
-                  ? Colors.white
-                  : HexColor.fromHex(ColorsInfo.main_dark)),
+          style: TextStyle(color: ColorsInfo.IsDark ? Colors.white : HexColor.fromHex(ColorsInfo.main_dark)),
         ),
         backgroundColor: ColorsInfo.GetColor(ColorType.Main),
       ),
@@ -58,15 +54,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               height: screenHeight / 1.5,
               decoration: BoxDecoration(
                   image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: Image.asset(screenWidth > 700
-                              ? (ColorsInfo.IsDark
-                                  ? 'assets/images/new_mod_screen_ipad_dark.png'
-                                  : 'assets/images/new_mod_screen_ipad.png')
-                              : (ColorsInfo.IsDark
-                                  ? 'assets/images/new_mod_screen_dark.png'
-                                  : 'assets/images/new_mod_screen.png'))
-                          .image)),
+                      fit: BoxFit.fill, image: Image.asset(screenWidth > 700 ? (ColorsInfo.IsDark ? 'assets/images/new_mod_screen_ipad_dark.png' : 'assets/images/new_mod_screen_ipad.png') : (ColorsInfo.IsDark ? 'assets/images/new_mod_screen_dark.png' : 'assets/images/new_mod_screen.png')).image)),
             ),
             Container(
               constraints: const BoxConstraints(maxWidth: 400),
@@ -87,15 +75,10 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                             child: Column(
                               children: [
                                 Container(
-                                  constraints:
-                                      const BoxConstraints(maxWidth: 900),
+                                  constraints: const BoxConstraints(maxWidth: 900),
                                   child: Text(
                                     AppLocale.feedback_desc.getString(context),
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: ColorsInfo.IsDark
-                                            ? Colors.white
-                                            : Colors.black),
+                                    style: TextStyle(fontSize: 12, color: ColorsInfo.IsDark ? Colors.white : Colors.black),
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
@@ -111,22 +94,14 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                                     maxLines: null,
                                     textAlign: TextAlign.start,
                                     textAlignVertical: TextAlignVertical.top,
-                                    style: const TextStyle(
-                                        color: Colors.grey, fontSize: 12),
+                                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                                     decoration: InputDecoration(
                                         filled: true,
-                                        contentPadding:
-                                            const EdgeInsets.all(15),
-                                        fillColor: ColorsInfo.GetColor(
-                                            ColorType.Second),
-                                        hintStyle: const TextStyle(
-                                            color: Colors.grey, fontSize: 12),
-                                        labelStyle: const TextStyle(
-                                            color: Colors.grey, fontSize: 12),
-                                        border: const OutlineInputBorder(
-                                            borderRadius: BorderRadius.zero,
-                                            borderSide: BorderSide.none,
-                                            gapPadding: 0),
+                                        contentPadding: const EdgeInsets.all(15),
+                                        fillColor: ColorsInfo.GetColor(ColorType.Second),
+                                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        labelStyle: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        border: const OutlineInputBorder(borderRadius: BorderRadius.zero, borderSide: BorderSide.none, gapPadding: 0),
                                         hintText: 'Feedback'),
                                   ),
                                 ),
@@ -146,20 +121,12 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                       child: Container(
                           height: 57,
                           constraints: const BoxConstraints(maxWidth: 500),
-                          decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                  colors: [
-                                HexColor.fromHex("#5092F0"),
-                                HexColor.fromHex("#636CE1")
-                              ],
-                                  begin: FractionalOffset.centerLeft,
-                                  end: FractionalOffset.centerRight)),
+                          decoration: BoxDecoration(gradient: LinearGradient(colors: [HexColor.fromHex("#5092F0"), HexColor.fromHex("#636CE1")], begin: FractionalOffset.centerLeft, end: FractionalOffset.centerRight)),
                           // color: HexColor.fromHex("#353539"),
                           child: Center(
                             child: Text(
                               AppLocale.feedback_button.getString(context),
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 15),
+                              style: const TextStyle(color: Colors.white, fontSize: 15),
                             ),
                           )),
                     ),

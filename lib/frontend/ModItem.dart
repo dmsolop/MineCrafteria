@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:morph_mods/backend/AccessKeys.dart';
-import 'package:morph_mods/extensions/color_extension.dart';
-import 'package:morph_mods/extensions/text_extension.dart';
+import 'package:minecrafteria/backend/AccessKeys.dart';
+import 'package:minecrafteria/extensions/color_extension.dart';
+import 'package:minecrafteria/extensions/text_extension.dart';
 import 'ColorsInfo.dart';
 import 'ModItemData.dart';
 

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:clever_ads_solutions/clever_ads_solutions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:morph_mods/frontend/ColorsInfo.dart';
+import 'package:minecrafteria/frontend/ColorsInfo.dart';
 
 import '../frontend/ModItemData.dart';
 import '../main.dart';

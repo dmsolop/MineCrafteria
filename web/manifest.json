@@ -1,6 +1,6 @@
 {
-    "name": "morph_mods",
-    "short_name": "morph_mods",
+    "name": "minecrafteria",
+    "short_name": "minecrafteria",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
