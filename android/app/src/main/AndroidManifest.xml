@@ -40,7 +40,7 @@
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-8858162097015410~6989772182"/>
+            android:value="ca-app-pub-4437806384755633~2095515992"/>
 
         <meta-data
         android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT" 
