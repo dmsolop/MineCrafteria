@@ -66,6 +66,7 @@ class _NativeAdSlotState extends State<NativeAdSlot> {
         });
         LogService.log('[NativeAdSlot] _adWidget set via setState → keyId=${widget.keyId}, runtimeType=${ad.runtimeType}');
       });
+      LogService.log('[NativeAdSlot] _loadAdOnce START → keyId=${widget.keyId}');
     });
   }
 

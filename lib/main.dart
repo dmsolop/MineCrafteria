@@ -29,6 +29,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'backend/native_ads/NativeAdManager.dart';
 import 'backend/LogService.dart';
+import 'backend/AccessKeys.dart';
 
 //test gap
 final FlutterLocalization localization = FlutterLocalization.instance;
@@ -46,6 +47,13 @@ void main() async {
   await Firebase.initializeApp(); // Firebase initialization
   await fetchRemoteConfig(); // Getting settings before launching CAS and nativeAd
   NativeAdManager().preLoadAd(style: NativeAdStyle.grid);
+
+  final requestConfiguration = RequestConfiguration(testDeviceIds: AccessKeys.testDeviceIds);
+  MobileAds.instance.updateRequestConfiguration(requestConfiguration);
+
+  // final requestConfiguration = await MobileAds.instance.getRequestConfiguration();
+  // final deviceInfo = requestConfiguration.testDeviceIds;
+  // LogService.log('[AdMob] Detected testDeviceIds → $deviceInfo');
 
   if (Platform.isAndroid || Platform.isIOS) {
     bool isTabletDevice = await isTablet();
@@ -115,7 +123,7 @@ Future<void> fetchRemoteConfig() async {
     Map<String, dynamic> allParams = remoteConfig.getAll();
     debugPrint("🔥 Remote Config Parameters: $allParams");
 
-    bool enableAds = remoteConfig.getBool("enable_ads");
+    bool enableAds = remoteConfig.getBool("isAdsEnabled");
     debugPrint("✅ Firebase Remote Config received. enable_ads: $enableAds");
 
     AdConfig.isAdsEnabled = enableAds;

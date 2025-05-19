@@ -56,6 +56,7 @@ class NativeAdManager {
     required VoidCallback refresh,
   }) {
     LogService.log('[NativeAdManager] getAdWidget called for index=$index');
+    LogService.log('[NativeAdManager] getAdWidget → index=$index, ad=${_nativeAds[index]}, isLoaded=${_adLoadedFlags[index]}');
 
     if (!_nativeAds.containsKey(index) && index < 100) {
       LogService.log('🚨 [NativeAdManager] getAdWidget() called with suspicious index=$index (less than 100)');
@@ -88,7 +89,7 @@ class NativeAdManager {
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
-            LogService.log('[NativeAdManager] ❌ onAdFailedToLoad for index=$index → $error');
+            LogService.log('[NativeAdManager] ❌ onAdFailedToLoad → index=$index, error=${error.message}');
           },
         ),
         request: const AdRequest(),
@@ -132,6 +133,7 @@ class NativeAdManager {
             },
             onAdFailedToLoad: (ad, error) {
               ad.dispose();
+              LogService.log('[NativeAdManager] ❌ onAdFailedToLoad → index=$index, error=${error.message}');
             },
           ),
           request: const AdRequest(),
