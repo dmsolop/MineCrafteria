@@ -12,6 +12,10 @@ class AdConfig {
   static bool isAdsEnabled = true;
 }
 
+class AdProviderConfig {
+  static const useAdMobInsteadOfCAS = true;
+}
+
 class AdManager {
   static MediationManager? manager;
   static InterstitialListener? interstitialListener;
@@ -24,6 +28,7 @@ class AdManager {
 
   static void initialize() async {
     // Set your Flutter version
+    
     CAS.settings.setTaggedAudience(Audience.notChildren);
 
     manager = CAS

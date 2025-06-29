@@ -6,6 +6,7 @@ import 'package:minecrafteria/backend/AdManager.dart';
 import 'package:minecrafteria/backend/CacheManager.dart';
 import 'package:minecrafteria/backend/FileManager.dart';
 import 'package:minecrafteria/backend/FileOpener.dart';
+import 'package:minecrafteria/backend/native_ads/AdMobOnlyManager.dart';
 import 'package:minecrafteria/extensions/text_extension.dart';
 import 'package:minecrafteria/frontend/FavoritesScreen.dart';
 
@@ -169,9 +170,13 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
 
   Future<void> _showInterstitialIfAvailable() async {
     if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
-      AdManager.interstitialListener = InterstitialListener();
-      await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
-      await waitWhile(() => AdManager.interstitialListener!.adEnded);
+      if (AdProviderConfig.useAdMobInsteadOfCAS) {
+        AdMobOnlyManager.showInterstitial();
+      } else {
+        AdManager.interstitialListener = InterstitialListener();
+        await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+        await waitWhile(() => AdManager.interstitialListener!.adEnded);
+      }
     }
   }
 
@@ -765,9 +770,13 @@ class ModDetailScreen extends State<ModDetailScreenWidget> {
 
         if (isFinal) {
           if (AdConfig.isAdsEnabled && await AdManager.manager!.isInterstitialReady()) {
-            AdManager.interstitialListener = InterstitialListener();
-            await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
-            await waitWhile(() => AdManager.interstitialListener!.adEnded);
+            if (AdProviderConfig.useAdMobInsteadOfCAS) {
+              AdMobOnlyManager.showInterstitial();
+            } else {
+              AdManager.interstitialListener = InterstitialListener();
+              await AdManager.manager!.showInterstitial(AdManager.interstitialListener!);
+              await waitWhile(() => AdManager.interstitialListener!.adEnded);
+            }
           }
 
           LogService.log('[ModDetailScreen] Opening mod from pageFinal → path=${paths.isNotEmpty ? paths[0] : 'NO PATH'}');
